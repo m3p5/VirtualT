@@ -629,7 +629,7 @@ void build_lpt_setup_tab(void)
 		gLptCtrl.pAutoFF->deactivate();
 
 	gLptCtrl.pAFFtimeout = new Fl_Input(280, 145, 40, 20, "");
-	sprintf(value, "%d", gLptPrefs.lpt_aff_timeout);
+	snprintf(value, sizeof(value), "%d", gLptPrefs.lpt_aff_timeout);
 	gLptCtrl.pAFFtimeout->value(value);
 	if (gLptPrefs.lpt_mode != LPT_MODE_EMUL)
 		gLptCtrl.pAFFtimeout->deactivate();
@@ -640,7 +640,7 @@ void build_lpt_setup_tab(void)
 		gLptCtrl.pAutoClose->deactivate();
 
 	gLptCtrl.pCloseTimeout = new Fl_Input(280, 170, 40, 20, "");
-	sprintf(value, "%d", gLptPrefs.lpt_close_timeout);
+	snprintf(value, sizeof(value), "%d", gLptPrefs.lpt_close_timeout);
 	gLptCtrl.pCloseTimeout->value(value);
 	if (gLptPrefs.lpt_mode != LPT_MODE_EMUL)
 		gLptCtrl.pCloseTimeout->deactivate();
@@ -946,7 +946,7 @@ void VTLpt::HandleTimeouts(unsigned long time)
 		}
 		else
 		{
-			sprintf(m_TimeStr, "%ld", m_PortTimeout + timeout - time);
+			snprintf(m_TimeStr, sizeof(m_TimeStr), "%ld", m_PortTimeout + timeout - time);
 			gpPrint->label(m_TimeStr);
 		}
 
@@ -1006,7 +1006,7 @@ void VTLpt::HandleTimeouts(unsigned long time)
 		}
 		else
 		{
-			sprintf(m_TimeStr, "%ld", m_PortActivity + timeout - time);
+			snprintf(m_TimeStr, sizeof(m_TimeStr), "%ld", m_PortActivity + timeout - time);
 			gpPrint->label(m_TimeStr);
 		}
 	}

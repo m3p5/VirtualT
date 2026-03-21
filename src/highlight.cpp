@@ -340,7 +340,7 @@ void style_parse(const char *text, char *style, int length)
 			{
 				current = 'C';
 				*style++ = current;
-				*style--;
+				style--;
 			} 
 
 			else if (strncmp(text, "\\\"", 2) == 0) 
@@ -363,12 +363,12 @@ void style_parse(const char *text, char *style, int length)
         		current = 'H';
       		} 
 
-			else if (!last && /*islower(*text) && */ text > 0)// && 
+			else if (!last && /*islower(*text) && */ text != nullptr)// &&
 //				!(isalnum(*(text-1)) || *(text-1)=='_')) 
 			{
         		// Might be a keyword...
 				for (temp = text, bufptr = buf; ((*temp > 0) && (isalnum(*temp) || *temp=='_')) && 
-					bufptr < (buf + sizeof(buf) - 1); *bufptr++ = tolower(*temp++));
+					bufptr < (buf + sizeof(buf) - 1); *bufptr++ = tolower(*temp++))
 				{
 					//if (!islower(*temp)) 
 					{
@@ -483,11 +483,6 @@ void style_parse(const char *text, char *style, int length)
 
    		// Copy style info...
    		if (current == 'A' && (*text == '{' || *text == '}')) *style++ = 'G';
-   		/*else if(current == 'E' && strncmp(text, "/*", 2) == 0) {
-   			*style++ = 'C';
-   			*style++ = 'C';
-   			//*style--;
-   		}*/
    		else if(current == 'E' && strncmp(text, "/*", 2) == 0)
    		{
    			*style++ = 'C';      			

@@ -456,7 +456,7 @@ int My_Text_Editor::handle_key() {
   		insert_position(inspos);
   		insert("\t");
   	}
-	delete line;
+  delete[] line;
   	autobrace = false;
 	return 1;
   }
@@ -469,7 +469,7 @@ int My_Text_Editor::handle_key() {
 	for(unsigned int i = 0; i < strlen(line); i++) {
 		if(line[i]!=' ' && line[i]!='\t') { pos = i; break; }
 	}
-	delete line;
+  delete[] line;
 	int old = insert_position();
 	insert_position(buffer()->line_start(insert_position()) + pos);
 	if(state == FL_SHIFT) 
@@ -583,12 +583,12 @@ void My_Text_Editor::UpdateStatusBar(void)
 		if (m_pStatusBar != NULL)
 		{
 			// Update row
-			sprintf(m_pStatusBar->linestr, "Ln %d", zeile);
+			snprintf(m_pStatusBar->linestr, sizeof(m_pStatusBar->linestr), "Ln %d", zeile);
 			m_pStatusBar->m_pLineBox->label(m_pStatusBar->linestr);
 			m_pStatusBar->line = zeile;
 
 			// Update col
-			sprintf(m_pStatusBar->colstr, "Col %d", spalte+1);
+			snprintf(m_pStatusBar->colstr, sizeof(m_pStatusBar->colstr), "Col %d", spalte+1);
 			m_pStatusBar->m_pColBox->label(m_pStatusBar->colstr);
 			m_pStatusBar->col = spalte;
 

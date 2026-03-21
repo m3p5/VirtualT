@@ -516,7 +516,7 @@ Flu_File_Chooser :: Flu_File_Chooser( const char *pathname, const char *pat, int
     previewTile->add_resizable( *b );
   }
   previewTile->end();
-  previewTile->position( previewGroup->x(), previewGroup->y(), previewTile->x()+previewTile->w(), previewGroup->y() );
+  previewTile->move_intersection( previewGroup->x(), previewGroup->y(), previewTile->x()+previewTile->w(), previewGroup->y() );
   previewTile->last = previewTile->x()+previewTile->w()-200;
 
   resizable( previewTile );
@@ -643,7 +643,7 @@ Flu_File_Chooser :: ~Flu_File_Chooser()
 void Flu_File_Chooser :: cancelCB()
 { 
   filename.value("");
-  filename.position( filename.size(), filename.size() );
+  filename.insert_position( filename.size(), filename.size() );
   unselect_all();
   hide();
 }
@@ -806,7 +806,7 @@ void Flu_File_Chooser :: newFolderCB()
       if( found )
 	{
 	  char buf[16];
-	  sprintf( buf, "%d", count++ );
+	  snprintf(buf, sizeof(buf), "%d", count++ );
 	  newName = "New Folder" + FluSimpleString(buf);
 	  path = currentDir + newName;
 	}
@@ -837,7 +837,7 @@ void Flu_File_Chooser :: newFolderCB()
   entry->editMode = 2;
   entry->value( entry->filename.c_str() );
   entry->take_focus();
-  entry->position( 0, entry->filename.size() );  
+  entry->insert_position( 0, entry->filename.size() );  
   if( !fileDetailsBtn->value() )
     filelist->scroll_to( entry );
   else
@@ -1515,7 +1515,7 @@ void Flu_File_Chooser :: okCB()
 	  if( strlen( filename.value() ) != 0 )
 	    cd( filename.value() );
 	  filename.value( currentDir.c_str() );
-	  filename.position( filename.size(), filename.size() );
+          filename.insert_position( filename.size(), filename.size() );
 	}
       hide();
     }
@@ -1541,7 +1541,7 @@ void Flu_File_Chooser :: okCB()
 	  // prepend the path
 	  FluSimpleString path = currentDir + filename.value();
 	  filename.value( path.c_str() );
-	  filename.position( filename.size(), filename.size() );
+          filename.insert_position( filename.size(), filename.size() );
 	  hide();
 	}
     }
@@ -1747,7 +1747,7 @@ int Flu_File_Chooser :: FileList :: handle( int event )
     {
       chooser->unselect_all();
       chooser->filename.value( "" );
-      chooser->filename.position( chooser->filename.size(), chooser->filename.size() );
+      chooser->filename.insert_position( chooser->filename.size(), chooser->filename.size() );
 
       if( Fl::event_button3() )
 	return chooser->popupContextMenu( NULL );
@@ -2086,7 +2086,7 @@ int Flu_File_Chooser :: Entry :: handle( int event )
 	      FluSimpleString path = chooser->currentDir + filename;
 	      chooser->filename.value( path.c_str() );
 	      //chooser->filename.value( filename.c_str() );
-	      chooser->filename.position( chooser->filename.size(), chooser->filename.size() );
+              chooser->filename.insert_position( chooser->filename.size(), chooser->filename.size() );
 	      Fl::add_timeout( 0.0f, Flu_File_Chooser::selectCB, chooser );
 	    }
 	  if( selected )
@@ -2196,7 +2196,7 @@ int Flu_File_Chooser :: Entry :: handle( int event )
 	chooser->filename.value( filename.c_str() );
       else
 	chooser->filename.value( "" );
-      chooser->filename.position( chooser->filename.size(), chooser->filename.size() );
+      chooser->filename.insert_position( chooser->filename.size(), chooser->filename.size() );
 
       return 1;
     }
@@ -2256,7 +2256,7 @@ void Flu_File_Chooser :: Entry :: editCB()
   editMode = 2;
   value( filename.c_str() );
   take_focus();
-  position( 0, filename.size() );
+  insert_position( 0, filename.size() );
   chooser->trashBtn->deactivate();
 }
 
@@ -2335,7 +2335,7 @@ int Flu_File_Chooser :: popupContextMenu( Entry *entry )
 	  entry->editMode = 2;
 	  entry->value( entry->filename.c_str() );
 	  entry->take_focus();
-	  entry->position( 0, entry->filename.size() );
+          entry->insert_position( 0, entry->filename.size() );
 	  trashBtn->deactivate();
 	  break;
 	case ACTION_DELETE:
@@ -2489,7 +2489,7 @@ void Flu_File_Chooser :: value( const char *v )
 	slash = v;
     }
   filename.value( slash );
-  filename.position( filename.size(), filename.size() );
+  filename.insert_position( filename.size(), filename.size() );
   Fl_Group *g = getEntryGroup();
   for( int i = 0; i < g->children(); i++ )
     {
@@ -2519,7 +2519,7 @@ const char* Flu_File_Chooser :: value( int n )
 	    {
 	      FluSimpleString s = currentDir + ((Entry*)g->child(i))->filename;
 	      filename.value( s.c_str() );
-	      filename.position( filename.size(), filename.size() );
+              filename.insert_position( filename.size(), filename.size() );
 	      return value();
 	    }
 	  n--;
@@ -2591,7 +2591,7 @@ FluSimpleString Flu_File_Chooser :: formatDate( const char *d )
   else if( strcmp(MM,"Nov")==0 ) month = 11;
   else month = 12;
 
-  sprintf( dummy, "%d/%d/%02d %d:%02d %s", month, day, year, hour, minute, pm?"PM":"AM" );
+  snprintf(dummy, sizeof(dummy), "%d/%d/%02d %d:%02d %s", month, day, year, hour, minute, pm?"PM":"AM" );
 
   FluSimpleString formatted = dummy;
 
@@ -3389,27 +3389,27 @@ void Flu_File_Chooser :: cd( const char *localpath )
 		if( (entry->isize >> 40) > 0 ) // terrabytes
 		{
 		double TB = double(entry->isize)/double(1<<40);
-		sprintf( buf, "%.1f TB", TB );
+		snprintf(buf, sizeof(buf), "%.1f TB", TB );
 		}
 	      */
 	      if( (entry->isize >> 30) > 0 ) // gigabytes
 		{
 		  double GB = double(entry->isize)/double(1<<30);
-		  sprintf( buf, "%.1f GB", GB );
+		  snprintf(buf, sizeof(buf), "%.1f GB", GB );
 		}
 	      else if( (entry->isize >> 20) > 0 ) // megabytes
 		{
 		  double MB = double(entry->isize)/double(1<<20);
-		  sprintf( buf, "%.1f MB", MB );
+		  snprintf(buf, sizeof(buf), "%.1f MB", MB );
 		}
 	      else if( (entry->isize >> 10) > 0 ) // kilabytes
 		{
 		  double KB = double(entry->isize)/double(1<<10);
-		  sprintf( buf, "%.1f KB", KB );
+		  snprintf(buf, sizeof(buf), "%.1f KB", KB );
 		}
 	      else // bytes
 		{
-		  sprintf( buf, "%d bytes", (int)entry->isize );
+		  snprintf(buf, sizeof(buf), "%d bytes", (int)entry->isize );
 		}
 	      entry->filesize = buf;
 	    }
@@ -3544,9 +3544,9 @@ void Flu_File_Chooser :: cd( const char *localpath )
     }
 
   if( _isProbablyAPattern( filename.value() ) )
-    filename.position( 0, filename.size() );
+    filename.insert_position( 0, filename.size() );
   else
-    filename.position( filename.size(), filename.size() );
+    filename.insert_position( filename.size(), filename.size() );
   filename.take_focus();
 
   redraw();

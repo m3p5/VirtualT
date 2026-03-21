@@ -3929,7 +3929,7 @@ int VTLinker::GenerateOutputFile()
 		fclose(fd);
 
 		// Delete the ROM memory
-		delete pRom;
+		delete[] pRom;
 	}
 
 	// We don't support Library output yet, but soon...
@@ -4467,7 +4467,7 @@ int VTLinker::BackAnnotateListingFiles(void)
 				if (pFileSection->m_Type != ASEG)
 				{
 					addr += pFileSection->m_LocateAddr;
-					sprintf(lineBuf, "%04X", addr);
+					snprintf(lineBuf, sizeof(lineBuf), "%04X", addr);
 
 					// Seek back, write the new addr and then restore
 					fdpos2 = ftell(fd);
@@ -4549,14 +4549,14 @@ int VTLinker::BackAnnotateListingFiles(void)
 
 							// Seek to the location in the lst file for LSB
 							fseek(fd, m_AddrLines.a[pRel->r_offset].fdPos, SEEK_SET);
-							sprintf(str, "%02X", m_AddrLines.a[pRel->r_offset].value);
+							snprintf(str, sizeof(str), "%02X", m_AddrLines.a[pRel->r_offset].value);
 							fwrite(str, 1, 2, fd);
 
 							if (m_AddrLines.a[pRel->r_offset+1].pObjFile != NULL)
 							{
 								// Seek to the location in the lst file for MSB
 								fseek(fd, m_AddrLines.a[pRel->r_offset+1].fdPos, SEEK_SET);
-								sprintf(str, "%02X", m_AddrLines.a[pRel->r_offset+1].value);
+								snprintf(str, sizeof(str), "%02X", m_AddrLines.a[pRel->r_offset+1].value);
 								fwrite(str, 1, 2, fd);
 							}
 						}
@@ -4602,14 +4602,14 @@ int VTLinker::BackAnnotateListingFiles(void)
 
 					// Seek to the location in the lst file for LSB
 					fseek(fd, m_AddrLines.a[offset].fdPos, SEEK_SET);
-					sprintf(str, "%02X", m_AddrLines.a[offset].value);
+					snprintf(str, sizeof(str), "%02X", m_AddrLines.a[offset].value);
 					fwrite(str, 1, 2, fd);
 
 					if (m_AddrLines.a[offset+1].pObjFile != NULL)
 					{
 						// Seek to the location in the lst file for MSB
 						fseek(fd, m_AddrLines.a[offset+1].fdPos, SEEK_SET);
-						sprintf(str, "%02X", m_AddrLines.a[offset+1].value);
+						snprintf(str, sizeof(str), "%02X", m_AddrLines.a[offset+1].value);
 						fwrite(str, 1, 2, fd);
 					}
 				}

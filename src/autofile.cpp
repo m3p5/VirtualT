@@ -105,7 +105,7 @@ MString VTAutoFile::GenFilename()
 			else if (formatCode[c+1] == 'p')
 			{
 				// Add page number
-				sprintf(page, "%d", m_PageNum);
+				snprintf(page, sizeof(page), "%d", m_PageNum);
 				if (seqFound)
 					afterSeq += page;
 				else
@@ -135,7 +135,7 @@ MString VTAutoFile::GenFilename()
 			for (seq = 0; ;seq++)
 			{
 				// Build filename for testing
-				sprintf(page, "%d", seq);
+				snprintf(page, sizeof(page), "%d", seq);
 				filename = m_DirName;
 				filename += beforeSeq + page + afterSeq;
 
@@ -153,7 +153,7 @@ MString VTAutoFile::GenFilename()
 		}
 
 		// Build the filename
-		sprintf(page, "%d", m_ActiveSeqNum);
+		snprintf(page, sizeof(page), "%d", m_ActiveSeqNum);
 		filename = m_DirName + beforeSeq + page + afterSeq;
 	}
 	else
@@ -181,7 +181,7 @@ int VTAutoFile::PromptFilename()
 		if (m_PageNum == 1)
 			strcpy(text, (const char *) m_ChooserTitle);
 		else
-			sprintf(text, "Select File for Page %d", m_PageNum);
+			snprintf(text, sizeof(text), "Select File for Page %d", m_PageNum);
 
 		if (m_Filename == "")
 			m_Filename = ".";

@@ -615,7 +615,7 @@ dialog box.
 void cb_prefs(Fl_Widget* w, void*)
 {
 	text_size_choice->value((text_size - 6)/2);
-	sprintf(stab, "%d", tab_size);
+	snprintf(stab, sizeof(stab), "%d", tab_size);
 	tab_size_choice->value(stab);
 	save_wsoe_check->value(save_window_size);
 	hide_output_check->value(auto_hide);
@@ -1032,7 +1032,7 @@ void VT_Ide::LoadPrefs(void)
 	virtualt_prefs.get("Ide_TabSize", tab_size, 4);
 	for (c = 0; c < VT_NUM_RECENT_FILES; c++)
 	{
-		sprintf(sRecentFile, "Ide_RecentFile%d", c + 1);
+		snprintf(sRecentFile, sizeof(sRecentFile), "Ide_RecentFile%d", c + 1);
 		virtualt_prefs.get(sRecentFile, gRecentFile[c], "", 
 			sizeof(gRecentFile[0]));
 		if (strlen(gRecentFile[c]) != 0)
@@ -1046,7 +1046,7 @@ void VT_Ide::LoadPrefs(void)
 
 	for (c = 0; c < VT_NUM_RECENT_PROJECTS; c++)
 	{
-		sprintf(sRecentFile, "Ide_RecentProject%d", c + 1);
+		snprintf(sRecentFile, sizeof(sRecentFile), "Ide_RecentProject%d", c + 1);
 		virtualt_prefs.get(sRecentFile, gRecentProject[c], "", 
 			sizeof(gRecentProject[0]));
 		if (strlen(gRecentProject[c]) != 0)
@@ -1091,12 +1091,12 @@ void VT_Ide::SavePrefs(void)
 	virtualt_prefs.set("Ide_TabSize", tab_size);
 	for (int c = 0; c < VT_NUM_RECENT_FILES; c++)
 	{
-		sprintf(sRecentFile, "Ide_RecentFile%d", c + 1);
+		snprintf(sRecentFile, sizeof(sRecentFile), "Ide_RecentFile%d", c + 1);
 		virtualt_prefs.set(sRecentFile, gRecentFile[c]);
 	}
 	for (int c = 0; c < VT_NUM_RECENT_PROJECTS; c++)
 	{
-		sprintf(sRecentFile, "Ide_RecentProject%d", c + 1);
+		snprintf(sRecentFile, sizeof(sRecentFile), "Ide_RecentProject%d", c + 1);
 		virtualt_prefs.set(sRecentFile, gRecentProject[c]);
 	}
 	virtualt_prefs.set("Ide_ColorText", (int) hl_plain);
@@ -1615,7 +1615,7 @@ VT_Ide::VT_Ide(int x, int y, int w, int h, const char *title)
 	virtualt_prefs.get("IdeTabheight", ideTabHeight, 75);
 
 	// Reposition the tile separators to be a little bigger than the minimum
-	tile->position(ideTreeWidth,MENU_HEIGHT-2+h-75+28, ideTreeWidth,MENU_HEIGHT-2+h-(ideTabHeight)+28);
+		tile->move_intersection(ideTreeWidth,MENU_HEIGHT-2+h-75+28, ideTreeWidth,MENU_HEIGHT-2+h-(ideTabHeight)+28);
 
 	SetColors(hl_plain, background_color);
 
@@ -2496,7 +2496,7 @@ void VT_Ide::SaveProject(void)
 	SaveProjectIdeSettings();
 
 	// Create the project file path and add to recent
-	sprintf(fullPath, "%s/%s.prj", (const char *) m_ActivePrj->m_RootPath,
+	snprintf(fullPath, sizeof(fullPath), "%s/%s.prj", (const char *) m_ActivePrj->m_RootPath,
 		(const char *) m_ActivePrj->m_Name);
 	add_recent_project_to_menu(fullPath);
 
@@ -2617,7 +2617,7 @@ void VT_Ide::SaveProjectIdeSettings()
 		return;
 
 	// Create the path
-	sprintf(fullPath, "%s/%s.ide", (const char *) m_ActivePrj->m_RootPath,
+	snprintf(fullPath, sizeof(fullPath), "%s/%s.ide", (const char *) m_ActivePrj->m_RootPath,
 		(const char *) m_ActivePrj->m_Name);
 
 	// Try to open the file for write mode
@@ -2685,7 +2685,7 @@ void VT_Ide::ReadProjectIdeSettings()
 	int				pos;
 
 	// Create the path
-	sprintf(line, "%s/%s.ide", (const char *) m_ActivePrj->m_RootPath,
+	snprintf(line, sizeof(line), "%s/%s.ide", (const char *) m_ActivePrj->m_RootPath,
 		(const char *) m_ActivePrj->m_Name);
 
 	// Try to open the file for write mode

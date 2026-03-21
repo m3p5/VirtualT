@@ -186,7 +186,7 @@ void handle_error(void)
 {
 	char	msg[512];
 	
-	sprintf(msg, "Error token = %d", (PCB).error_frame_token);
+	snprintf(msg, sizeof(msg), "Error token = %d", (PCB).error_frame_token);
 }
 
 void syntax_error(const char *token_name)
@@ -707,7 +707,7 @@ static void ag_rp_90(int c) {
 
 static void ag_rp_91(int ch1, int ch2) {
 /* Line 270, C:/Projects/VirtualT/src/a85parse.syn */
- ss_idx++; ss_len = 2; sprintf(ss[ss_idx], "%c%c", ch1, ch2); 
+ ss_idx++; ss_len = 2; snprintf(ss[ss_idx], sizeof(ss[ss_idx]), "%c%c", ch1, ch2); 
 }
 
 static void ag_rp_92(int c) {
@@ -7940,22 +7940,22 @@ static void ag_diagnose(void) {
   int ag_k = ag_sbt[ag_snd];
 
   if (*TOKEN_NAMES[ag_tstt[ag_k]] && ag_astt[ag_k + 1] == ag_action_8) {
-    sprintf((PCB).ag_msg, MISSING_FORMAT, TOKEN_NAMES[ag_tstt[ag_k]]);
+    snprintf((PCB).ag_msg, sizeof((PCB).ag_msg), MISSING_FORMAT, TOKEN_NAMES[ag_tstt[ag_k]]);
   }
   else if (ag_astt[ag_sbe[(PCB).sn]] == ag_action_8
           && (ag_k = (int) ag_sbe[(PCB).sn] + 1) == (int) ag_sbt[(PCB).sn+1] - 1
           && *TOKEN_NAMES[ag_tstt[ag_k]]) {
-    sprintf((PCB).ag_msg, MISSING_FORMAT, TOKEN_NAMES[ag_tstt[ag_k]]);
+    snprintf((PCB).ag_msg, sizeof((PCB).ag_msg), MISSING_FORMAT, TOKEN_NAMES[ag_tstt[ag_k]]);
   }
   else if ((PCB).token_number && *TOKEN_NAMES[(PCB).token_number]) {
-    sprintf((PCB).ag_msg, UNEXPECTED_FORMAT, TOKEN_NAMES[(PCB).token_number]);
+    snprintf((PCB).ag_msg, sizeof((PCB).ag_msg), UNEXPECTED_FORMAT, TOKEN_NAMES[(PCB).token_number]);
   }
   else if (isprint((*(PCB).lab)) && (*(PCB).lab) != '\\') {
     char buf[20];
-    sprintf(buf, "\'%c\'", (char) (*(PCB).lab));
-    sprintf((PCB).ag_msg, UNEXPECTED_FORMAT, buf);
+    snprintf(buf, sizeof(buf), "\'%c\'", (char) (*(PCB).lab));
+    snprintf((PCB).ag_msg, sizeof((PCB).ag_msg), UNEXPECTED_FORMAT, buf);
   }
-  else sprintf((PCB).ag_msg, UNEXPECTED_FORMAT, UNNAMED_TOKEN);
+  else snprintf((PCB).ag_msg, sizeof((PCB).ag_msg), UNEXPECTED_FORMAT, UNNAMED_TOKEN);
   (PCB).error_message = (PCB).ag_msg;
 
 

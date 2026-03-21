@@ -341,7 +341,7 @@ void update_length_field(const char *filename)
 		else
 		{
 			// Update Length field and End address fields
-			sprintf(gDialog.sBytes, "%d", len);
+			snprintf(gDialog.sBytes, sizeof(gDialog.sBytes), "%d", len);
 			gDialog.pBytes->label(gDialog.sBytes);
 			gDialog.pBytes->redraw_label();
 		}
@@ -362,7 +362,7 @@ void update_length_field(const char *filename)
 			fseek(fd, 0, SEEK_END);
 			len = ftell(fd);
 			fclose(fd);
-			sprintf(gDialog.sBytes, "%d", len);
+			snprintf(gDialog.sBytes, sizeof(gDialog.sBytes), "%d", len);
 			gDialog.pBytes->label(gDialog.sBytes);
 			gDialog.pBytes->redraw_label();
 		}
@@ -1613,7 +1613,7 @@ void T100_MemEditor::UpdateDispMem(void)
 			gDispMemory[c] = mem[c];
 
 			// Display new text
-			sprintf(string, "%02X", mem[c]);
+			snprintf(string, sizeof(string), "%02X", mem[c]);
 
 			// Calculate xpos and ypos of the text
 			xpos = (int) (x() + ((c&0x0F)*3+9+((c&0x0F)>7)) * m_Width);
@@ -1659,7 +1659,7 @@ void T100_MemEditor::UpdateDispMem(void)
 
 			// Draw the new ASCII value
 			if ((mem[c] >= ' ') && (mem[c] <= '~'))
-				sprintf(string, "%c", mem[c]);
+				snprintf(string, sizeof(string), "%c", mem[c]);
 			else
 				strcpy(string, ".");
 			xpos = (int) (x() + (59 + (c&0x0F)) * m_Width);
@@ -1782,11 +1782,11 @@ void T100_MemEditor::draw()
 		if ((region == REGION_RAM) || (region == REGION_RAM2) || 
 			(region == REGION_RAM3) || region == REGION_RAM1 || (region == REGION_RAM4))
 		{
-			sprintf(string, "%06X  ", addr + RAMSTART);
+			snprintf(string, sizeof(string), "%06X  ", addr + RAMSTART);
 			actualAddr += RAMSTART;
 		}
 		else
-			sprintf(string, "%06X  ", addr);
+			snprintf(string, sizeof(string), "%06X  ", addr);
 
 		// Calculate xpos and ypos of the text
 		xpos = (int) (x() + m_Width);
@@ -1813,7 +1813,7 @@ void T100_MemEditor::draw()
 			else
 				xpos = (int) (x() + (c*3 + 10) * m_Width);
 
-			sprintf(string, "%02X", line_bytes[c]);
+			snprintf(string, sizeof(string), "%02X", line_bytes[c]);
 
 			if (xpos + m_Width < w())
 			{
@@ -2680,7 +2680,7 @@ int T100_MemEditor::handle(int event)
 			if (shift)
 			{
 				memedit_ctrl.pMemRange->take_focus();
-				memedit_ctrl.pMemRange->position(0);
+							memedit_ctrl.pMemRange->insert_position(0);
 				memedit_ctrl.pMemRange->mark(9999);
 				return 1;
 			}
@@ -2725,7 +2725,7 @@ int T100_MemEditor::handle(int event)
 				if (key == 'g' || key=='G')
 				{
 					memedit_ctrl.pMemRange->take_focus();
-					memedit_ctrl.pMemRange->position(0);
+									memedit_ctrl.pMemRange->insert_position(0);
 					memedit_ctrl.pMemRange->mark(9999);
 				}
 				return 1;
@@ -2803,7 +2803,7 @@ int T100_MemEditor::handle(int event)
 					// Select 12 point Courier font
 					fl_font(m_Font, m_FontSize);
 
-					sprintf(string, "%02X", data);
+					snprintf(string, sizeof(string), "%02X", data);
 
 					// Calculate xpos and ypos of the text
 					xpos = (int) (x() + (col*3+9+(col>7)) * m_Width);
@@ -2842,7 +2842,7 @@ int T100_MemEditor::handle(int event)
 
 					// Prepare the new ASCII value to be drawn
 					if ((data >= ' ') && (data <= '~'))
-						sprintf(string, "%c", data);
+						snprintf(string, sizeof(string), "%c", data);
 					else
 						strcpy(string, ".");
 					xpos = (int) (x() + (59 + col) * m_Width);
@@ -2976,7 +2976,7 @@ int T100_MemEditor::handle(int event)
 					fl_rectf(xpos, ypos+2 - (int) m_Height, (int) m_Width*2, (int) m_Height-2);
 
 					// Draw Draw the HEX value
-					sprintf(string, "%02X", data);
+					snprintf(string, sizeof(string), "%02X", data);
 					if (actualAddr >= ROMSIZE && actualAddr < gRamBottom)
 						fl_color(fl_darker(FL_GRAY));
 					else if (IsHilighted(address))
@@ -2992,7 +2992,7 @@ int T100_MemEditor::handle(int event)
 
 					// Prepare the new ASCII value to be drawn
 					if ((data >= ' ') && (data <= '~'))
-						sprintf(string, "%c", data);
+						snprintf(string, sizeof(string), "%c", data);
 					else
 						strcpy(string, ".");
 					xpos = (int) (x() + (59 + col) * m_Width);
@@ -3416,16 +3416,16 @@ void T100_MemEditor::UpdateAddressText()
 		(region == REGION_RAM3) || region == REGION_RAM1 || (region == REGION_RAM4))
 	{
 		if (gReMem)
-			sprintf(string, "0x%06X", (unsigned int) (address + RAMSTART));
+			snprintf(string, sizeof(string), "0x%06X", (unsigned int) (address + RAMSTART));
 		else
-			sprintf(string, "0x%04X", (unsigned int) (address + RAMSTART));
+			snprintf(string, sizeof(string), "0x%04X", (unsigned int) (address + RAMSTART));
 	}
 	else
 	{
 		if (gReMem)
-			sprintf(string, "0x%06X", (unsigned int) address);
+			snprintf(string, sizeof(string), "0x%06X", (unsigned int) address);
 		else
-			sprintf(string, "0x%04X", (unsigned int) address);
+			snprintf(string, sizeof(string), "0x%04X", (unsigned int) address);
 	}
 	memedit_ctrl.pMemRange->value(string);
 }
@@ -3637,9 +3637,9 @@ void T100_MemEditor::SaveRegionMarkers()
 		{
 			// Create next marker text
 			if (pMarkers->startAddr == pMarkers->endAddr)
-				sprintf(markerText, "%d", pMarkers->startAddr);
+				snprintf(markerText, sizeof(markerText), "%d", pMarkers->startAddr);
 			else
-				sprintf(markerText, "%d-%d", pMarkers->startAddr, pMarkers->endAddr);
+				snprintf(markerText, sizeof(markerText), "%d-%d", pMarkers->startAddr, pMarkers->endAddr);
 
 			// If there's another marker after this one, append a ','
 			if (pMarkers->pNext != NULL)
@@ -4068,7 +4068,7 @@ void cb_setup_memedit(Fl_Widget* w, void* pOpaque)
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	p.pFontSize = new Fl_Input(120, 20, 60, 20, "");
 	p.pFontSize->align(FL_ALIGN_LEFT);
-	sprintf(p.sFontSize, "%d", memedit_ctrl.pMemEdit->GetFontSize());
+	snprintf(p.sFontSize, sizeof(p.sFontSize), "%d", memedit_ctrl.pMemEdit->GetFontSize());
 	p.pFontSize->value(p.sFontSize);
 
 	/* Create checkbox for bold font selection */

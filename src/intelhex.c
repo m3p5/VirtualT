@@ -64,9 +64,7 @@ void hexout(FILE *fhex, int byte, int memory_location, int end, int base_address
 /* line was valid, or a 0 if an error occured.  The variable */
 /* num gets the number of bytes that were stored into bytes[] */
 
-int parse_hex_line(theline, bytes, addr, num, code)
-char *theline;
-int *addr, *num, *code, bytes[];
+int parse_hex_line(char *theline, int bytes[], int *addr, int *num, int *code)
 {
 	int sum, len, cksum;
 	char *ptr;
@@ -155,7 +153,7 @@ int load_hex_file(char *filename, char *buffer, unsigned short *start_addr)
 				*start_addr = minaddr;
 				return n;
 			}
-			if (status == 2) ;  /* begin of file */
+			if (status == 2) {  /* begin of file */ }
 		} else {
 			fclose(fin);
 			return 0;

@@ -94,7 +94,7 @@ void cb_readStatus (Fl_Widget* w, void*)
 	rememcfg_ctrl.pIOEnable->value(mode & REMEM_MODE_IOENABLE);
 	rememcfg_ctrl.pRampacEnable->value(mode & REMEM_MODE_RAMPAC);
 	rememcfg_ctrl.pStatusMap->value((mode & REMEM_MODE_MAP_BITS) >> REMEM_MODE_MAP_SHIFT);
-	sprintf(rememcfg_ctrl.sStatus, "0x%02X", mode);
+	snprintf(rememcfg_ctrl.sStatus, sizeof(rememcfg_ctrl.sStatus), "0x%02X", mode);
 	rememcfg_ctrl.pStatus->label(rememcfg_ctrl.sStatus);
 }
 
@@ -109,7 +109,7 @@ void cb_writeStatus (Fl_Widget* w, void*)
 
 	out(REMEM_MODE_PORT, mode);
 
-	sprintf(rememcfg_ctrl.sStatus, "0x%02X", mode);
+	snprintf(rememcfg_ctrl.sStatus, sizeof(rememcfg_ctrl.sStatus), "0x%02X", mode);
 	rememcfg_ctrl.pStatus->label(rememcfg_ctrl.sStatus);
 }
 
@@ -316,7 +316,7 @@ void save_vector_edits(void)
 	}
 
 	// Update the vector browser text
-	sprintf(temp, "%02d  0x%04X", gVector, mapdata);
+	snprintf(temp, sizeof(temp), "%02d  0x%04X", gVector, mapdata);
 	rememcfg_ctrl.pVectorSelect->text(gVector+1, temp);
 }
 
@@ -355,10 +355,10 @@ void update_edit_info(void)
 	rememcfg_ctrl.pRamCS->value(mapdata & REMEM_VCTR_RAM_CS);
 	rememcfg_ctrl.pFlash1CS->value(mapdata & REMEM_VCTR_FLASH1_CS);
 	rememcfg_ctrl.pFlash2CS->value(mapdata & REMEM_VCTR_FLASH2_CS);
-	sprintf(rememcfg_ctrl.sVectorAddress, "0x1BF%03X", gMap * REMEM_MAP_SIZE + 
+	snprintf(rememcfg_ctrl.sVectorAddress, sizeof(rememcfg_ctrl.sVectorAddress), "0x1BF%03X", gMap * REMEM_MAP_SIZE + 
 		regionAddr + vector * 2);
 	rememcfg_ctrl.pVectorAddress->label(rememcfg_ctrl.sVectorAddress);
-	sprintf(temp, "0x%03X", mapdata & REMEM_VCTR_ADDRESS);
+	snprintf(temp, sizeof(temp), "0x%03X", mapdata & REMEM_VCTR_ADDRESS);
 	rememcfg_ctrl.pMapData->value(temp);
 }
 
@@ -413,7 +413,7 @@ void update_vector_browser(void)
 	start = get_region_offset(region);
 	for (c = 0; c < vectors; c++)
 	{
-		sprintf(temp, "%02d  0x%02X%02X", c, (unsigned char)gMapData[start+(c<<1)+1], 
+		snprintf(temp, sizeof(temp), "%02d  0x%02X%02X", c, (unsigned char)gMapData[start+(c<<1)+1], 
 			(unsigned char) gMapData[start+(c<<1)]);
 		rememcfg_ctrl.pVectorSelect->text(c+1, temp);
 	}
@@ -474,7 +474,7 @@ void cb_mapselect (Fl_Widget* w, void*)
 	// Test if current map was modified
 	if (gMapModified)
 	{
-		sprintf(temp, "Save Map %d changes to ReMem RAM?", gMap);
+		snprintf(temp, sizeof(temp), "Save Map %d changes to ReMem RAM?", gMap);
 
 		// Ask user if map should be saved
 		ret = fl_choice("Save Map %d changes to ReMem RAM?", "Cancel", "Yes", "No", gMap);
@@ -823,11 +823,11 @@ void cb_RememCfg (Fl_Widget* w, void*)
 	o->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
 
 	rememcfg_ctrl.pFWVersion = new Fl_Box(360, 30+MENU_HEIGHT, 50, 15, "");
-	sprintf(rememcfg_ctrl.sFW, "%d", inport(REMEM_REVID_PORT));
+	snprintf(rememcfg_ctrl.sFW, sizeof(rememcfg_ctrl.sFW), "%d", inport(REMEM_REVID_PORT));
 	rememcfg_ctrl.pFWVersion->label(rememcfg_ctrl.sFW);
 
 	rememcfg_ctrl.pStatus = new Fl_Box(130, 30+MENU_HEIGHT, 50, 15, "");
-	sprintf(rememcfg_ctrl.sStatus, "0x%02X", mode);
+	snprintf(rememcfg_ctrl.sStatus, sizeof(rememcfg_ctrl.sStatus), "0x%02X", mode);
 	rememcfg_ctrl.pStatus->label(rememcfg_ctrl.sStatus);
 
 	// Create a slider for selecting the active map
@@ -903,7 +903,7 @@ void cb_RememCfg (Fl_Widget* w, void*)
 		vectors = 32;
 	for (x = 0; x < vectors; x++)
 	{
-		sprintf(temp, "%02d  0x0000", x);
+		snprintf(temp, sizeof(temp), "%02d  0x0000", x);
 		rememcfg_ctrl.pVectorSelect->add(temp);
 	}
 	rememcfg_ctrl.pVectorSelect->callback(cb_vectorselect); 
@@ -913,7 +913,7 @@ void cb_RememCfg (Fl_Widget* w, void*)
 	o = new Fl_Box(FL_NO_BOX, 390, 145+MENU_HEIGHT, 100, 15, "RAM Address:");
 	o->align(FL_ALIGN_LEFT|FL_ALIGN_INSIDE);
 	rememcfg_ctrl.pVectorAddress = new Fl_Box(510, 145+MENU_HEIGHT, 100, 15, "");
-	sprintf(rememcfg_ctrl.sVectorAddress, "0x1BF000");
+	snprintf(rememcfg_ctrl.sVectorAddress, sizeof(rememcfg_ctrl.sVectorAddress), "0x1BF000");
 	rememcfg_ctrl.pVectorAddress->label(rememcfg_ctrl.sVectorAddress);
 
 	o = new Fl_Box(FL_NO_BOX, 390, 170+MENU_HEIGHT, 100, 15, "Sector Lock");

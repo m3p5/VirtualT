@@ -640,7 +640,7 @@ void VTDisWhat::CbOkay(void)
 		gpDis->CopyIntoMem(pBuf, size, addr);
 		gpDis->m_StartAddress = addr;
 		gpDis->m_EndAddress = addr+size-1;
-		delete pBuf;
+		delete[] pBuf;
 
 		// Now copy the standard ROM into the lower memory space
 		gpDis->CopyIntoMem(gSysROM, ROMSIZE);
@@ -1044,9 +1044,9 @@ void VTDis::Disassemble()
 			if (rst7 == 1)
 			{
 				if (oldSchool)
-					sprintf(line, "%04XH  DB   %02XH\n", c, m_memory[c]);
+					snprintf(line, sizeof(line), "%04XH  DB   %02XH\n", c, m_memory[c]);
 				else
-					sprintf(line, "    %sDB      %02XH\n", pSpaces, m_memory[c]);
+					snprintf(line, sizeof(line), "    %sDB      %02XH\n", pSpaces, m_memory[c]);
 				tb->append(line);
 				rst7 = 0;
 				continue;
@@ -1056,9 +1056,9 @@ void VTDis::Disassemble()
 			if (rst1 == 1)
 			{
 				if (oldSchool)
-					sprintf(line, "%04XH  DB   %02XH\n", c, m_memory[c]);
+					snprintf(line, sizeof(line), "%04XH  DB   %02XH\n", c, m_memory[c]);
 				else
-					sprintf(line, "    %sDB      %02XH\n", pSpaces, m_memory[c]);
+					snprintf(line, sizeof(line), "    %sDB      %02XH\n", pSpaces, m_memory[c]);
 				tb->append(line);
 				rst1 = 0;
 				continue;
@@ -1102,16 +1102,16 @@ void VTDis::Disassemble()
 							if (!str_active)
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   80H or '%c'", next, m_memory[next] & 0x7F);
+									snprintf(line, sizeof(line), "%04XH  DB   80H or '%c'", next, m_memory[next] & 0x7F);
 								else
-									sprintf(line, "    %sDB      80H or '%c'", pSpaces, m_memory[next] & 0x7F);
+									snprintf(line, sizeof(line), "    %sDB      80H or '%c'", pSpaces, m_memory[next] & 0x7F);
 								str_active = 1;
 								if ((m_memory[next+1] & 0x80) == 0)
 									strcat(line, ",\"");
 							}
 							else
 							{
-								sprintf(arg, "%c", m_memory[next]);
+								snprintf(arg, sizeof(arg), "%c", m_memory[next]);
 								strcat(line, arg);
 							}
 
@@ -1139,20 +1139,20 @@ void VTDis::Disassemble()
 							if (m_memory[next] == 0)
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   00H\n", next);
+									snprintf(line, sizeof(line), "%04XH  DB   00H\n", next);
 								else
-									sprintf(line, "    %sDB      00H\n", pSpaces);
+									snprintf(line, sizeof(line), "    %sDB      00H\n", pSpaces);
 								tb->append(line);
 								line[0] = 0;
 								continue;
 							}
 							if ((m_memory[next] & 0x80) && (str_active))
 							{
-								sprintf(arg, "\",'%c' or 80H", m_memory[next] & 0x7F);
+								snprintf(arg, sizeof(arg), "\",'%c' or 80H", m_memory[next] & 0x7F);
 								strcat(line, arg);
 								if (m_pRom->pTables[x].type == TABLE_TYPE_MODIFIED_STRING2)
 								{ 
-									sprintf(arg, ", %02XH\n", m_memory[next+1]);
+									snprintf(arg, sizeof(arg), ", %02XH\n", m_memory[next+1]);
 									next++;
 								}
 								else
@@ -1168,12 +1168,12 @@ void VTDis::Disassemble()
 								if (m_memory[next] & 0x80)
 								{
 									if (oldSchool)
-										sprintf(line, "%04XH  DB   '%c' OR 80H", next, m_memory[next] & 0x7F);
+										snprintf(line, sizeof(line), "%04XH  DB   '%c' OR 80H", next, m_memory[next] & 0x7F);
 									else
-										sprintf(line, "    %sDB      '%c' OR 80H", pSpaces, m_memory[next] & 0x7F);
+										snprintf(line, sizeof(line), "    %sDB      '%c' OR 80H", pSpaces, m_memory[next] & 0x7F);
 									if (m_pRom->pTables[x].type == TABLE_TYPE_MODIFIED_STRING2)
 									{
-										sprintf(arg, ", %02XH\n", m_memory[next+1]);
+										snprintf(arg, sizeof(arg), ", %02XH\n", m_memory[next+1]);
 										next++;
 									}
 									else
@@ -1187,15 +1187,15 @@ void VTDis::Disassemble()
 								else
 								{
 									if (oldSchool)
-										sprintf(line, "%04XH  DB   \"%c", next, m_memory[next]);
+										snprintf(line, sizeof(line), "%04XH  DB   \"%c", next, m_memory[next]);
 									else
-										sprintf(line, "    %sDB      \"%c", pSpaces, m_memory[next]);
+										snprintf(line, sizeof(line), "    %sDB      \"%c", pSpaces, m_memory[next]);
 									str_active = 1;
 								}
 							}
 							else
 							{
-								sprintf(arg, "%c", m_memory[next]);
+								snprintf(arg, sizeof(arg), "%c", m_memory[next]);
 								strcat(line, arg);
 							}
 
@@ -1227,7 +1227,7 @@ void VTDis::Disassemble()
 						{
 							if ((m_memory[next] > 0x7E || m_memory[next] < 0x20) && (str_active))
 							{
-								sprintf(arg, "\",%02XH\n", m_memory[next]);
+								snprintf(arg, sizeof(arg), "\",%02XH\n", m_memory[next]);
 								strcat(line, arg);
 								tb->append(line);
 								line[0]=0;
@@ -1239,23 +1239,23 @@ void VTDis::Disassemble()
 								if (m_memory[next] > 0x7E || m_memory[next] < 0x20)
 								{
 									if (oldSchool)
-										sprintf(line, "%04XH  DB   %02XH\n", next, m_memory[next]);
+										snprintf(line, sizeof(line), "%04XH  DB   %02XH\n", next, m_memory[next]);
 									else
-										sprintf(line, "    %sDB      %02XH\n", pSpaces, m_memory[next]);
+										snprintf(line, sizeof(line), "    %sDB      %02XH\n", pSpaces, m_memory[next]);
 									tb->append(line);
 								}
 								else					   
 								{
 									if (oldSchool)
-										sprintf(line, "%04XH  DB   \"%c", next, m_memory[next]);
+										snprintf(line, sizeof(line), "%04XH  DB   \"%c", next, m_memory[next]);
 									else
-										sprintf(line, "    %sDB      \"%c", pSpaces, m_memory[next]);
+										snprintf(line, sizeof(line), "    %sDB      \"%c", pSpaces, m_memory[next]);
 									str_active = 1;
 								}
 							}
 							else
 							{
-								sprintf(arg, "%c", m_memory[next]);
+								snprintf(arg, sizeof(arg), "%c", m_memory[next]);
 								strcat(line, arg);
 							}
 						}
@@ -1283,14 +1283,14 @@ void VTDis::Disassemble()
 							if (count == 0)
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DW   ", next);
+									snprintf(line, sizeof(line), "%04XH  DW   ", next);
 								else
-									sprintf(line, "    %sDW      ", pSpaces);
+									snprintf(line, sizeof(line), "    %sDW      ", pSpaces);
 							}
 
 							addr = m_memory[next] | (m_memory[next+1] << 8);
 							if (oldSchool)
-								sprintf(arg, "%04XH", addr);
+								snprintf(arg, sizeof(arg), "%04XH", addr);
 							else
 							{
 								// Display the label
@@ -1304,7 +1304,7 @@ void VTDis::Disassemble()
 								else
 								{
 									// Append the generated label
-									sprintf(arg, "L_%04XH", addr);
+									snprintf(arg, sizeof(arg), "L_%04XH", addr);
 									m_pDisType[addr].dis_type |= DIS_TYPE_LABEL;
 								}
 							}
@@ -1341,9 +1341,9 @@ void VTDis::Disassemble()
 						for (next = c; next < last; next += 2)
 						{
 							if (oldSchool)
-								sprintf(line, "%04XH  DB   \"%c%c\"\n", next, m_memory[next], m_memory[next+1]);
+								snprintf(line, sizeof(line), "%04XH  DB   \"%c%c\"\n", next, m_memory[next], m_memory[next+1]);
 							else
-								sprintf(line, "    %sDB      \"%c%c\"\n", pSpaces, m_memory[next], m_memory[next+1]);
+								snprintf(line, sizeof(line), "    %sDB      \"%c%c\"\n", pSpaces, m_memory[next], m_memory[next+1]);
 							tb->append(line);
 						}
 					}
@@ -1356,10 +1356,10 @@ void VTDis::Disassemble()
 						for (next = c; next < last; next += 3)
 						{
 							if (oldSchool)
-								sprintf(line, "%04XH  DB   \"%c%c%c\"\n", next, m_memory[next], m_memory[next+1],
+								snprintf(line, sizeof(line), "%04XH  DB   \"%c%c%c\"\n", next, m_memory[next], m_memory[next+1],
 									m_memory[next+2]);
 							else
-								sprintf(line, "    %sDB      \"%c%c%c\"\n", pSpaces, m_memory[next], m_memory[next+1],
+								snprintf(line, sizeof(line), "    %sDB      \"%c%c%c\"\n", pSpaces, m_memory[next], m_memory[next+1],
 									m_memory[next+2]);
 							tb->append(line);
 						}
@@ -1375,19 +1375,19 @@ void VTDis::Disassemble()
 							if (iscntrl(m_memory[next]))
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   %02XH\n%04XH  DW   %04XH\n", next, m_memory[next],
+									snprintf(line, sizeof(line), "%04XH  DB   %02XH\n%04XH  DW   %04XH\n", next, m_memory[next],
 										next+1, m_memory[next+1] | (m_memory[next+2] << 8));
 								else
-									sprintf(line, "    %sDB      %02XH\n%04XH  %sDW   %04XH\n", pSpaces, m_memory[next],
+									snprintf(line, sizeof(line), "    %sDB      %02XH\n%04XH  %sDW   %04XH\n", pSpaces, m_memory[next],
 										next+1, pSpaces, m_memory[next+1] | (m_memory[next+2] << 8));
 							}
 							else
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   '%c'\n%04XH  DW   %04XH\n", next, m_memory[next],
+									snprintf(line, sizeof(line), "%04XH  DB   '%c'\n%04XH  DW   %04XH\n", next, m_memory[next],
 										next+1, m_memory[next+1] | (m_memory[next+2] << 8));
 								else
-									sprintf(line, "    %sDB      '%c'\n%04XH  %sDW   %04XH\n", pSpaces, m_memory[next],
+									snprintf(line, sizeof(line), "    %sDB      '%c'\n%04XH  %sDW   %04XH\n", pSpaces, m_memory[next],
 										next+1, pSpaces, m_memory[next+1] | (m_memory[next+2] << 8));
 							}
 							tb->append(line);
@@ -1402,17 +1402,17 @@ void VTDis::Disassemble()
 						for (next = c; next < last; next += 6)
 						{
 							if (oldSchool)
-								sprintf(line, "%04XH  DB   \"%c%c%c%c\"\n", next, m_memory[next],
+								snprintf(line, sizeof(line), "%04XH  DB   \"%c%c%c%c\"\n", next, m_memory[next],
 									m_memory[next+1], m_memory[next+2], m_memory[next+3]);
 							else
-								sprintf(line, "    %sDB      \"%c%c%c%c\"\n", pSpaces, m_memory[next],
+								snprintf(line, sizeof(line), "    %sDB      \"%c%c%c%c\"\n", pSpaces, m_memory[next],
 									m_memory[next+1], m_memory[next+2], m_memory[next+3]);
 							tb->append(line);
 							if (oldSchool)
-								sprintf(line, "%04XH  DW   %04XH\n", next+4, m_memory[next+4] | 
+								snprintf(line, sizeof(line), "%04XH  DW   %04XH\n", next+4, m_memory[next+4] | 
 									(m_memory[next+5] << 8));
 							else
-								sprintf(line, "    %sDW      %04XH\n", pSpaces, m_memory[next+4] | 
+								snprintf(line, sizeof(line), "    %sDW      %04XH\n", pSpaces, m_memory[next+4] | 
 									(m_memory[next+5] << 8));
 							tb->append(line);
 						}
@@ -1425,37 +1425,37 @@ void VTDis::Disassemble()
 						for (next = c; next < last; next += 11)
 						{
 							if (oldSchool)
-								sprintf(line, "%04XH  DB   %02XH\n", next, m_memory[next]);
+								snprintf(line, sizeof(line), "%04XH  DB   %02XH\n", next, m_memory[next]);
 							else
-								sprintf(line, "    %sDB      %02XH\n", pSpaces, m_memory[next]);
+								snprintf(line, sizeof(line), "    %sDB      %02XH\n", pSpaces, m_memory[next]);
 							tb->append(line);
 							if (oldSchool)
-								sprintf(line, "%04XH  DW   %04XH\n", next+1, m_memory[next+1] | 
+								snprintf(line, sizeof(line), "%04XH  DW   %04XH\n", next+1, m_memory[next+1] | 
 									(m_memory[next+2] << 8));
 							else
-								sprintf(line, "    %sDW      %04XH\n", pSpaces, m_memory[next+1] | 
+								snprintf(line, sizeof(line), "    %sDW      %04XH\n", pSpaces, m_memory[next+1] | 
 									(m_memory[next+2] << 8));
 							tb->append(line);
 
 							if (m_memory[next+3] == 0)
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   %02XH,\"%c%c%c%c%c%c\",%02XH\n", next+3, m_memory[next+3], 
+									snprintf(line, sizeof(line), "%04XH  DB   %02XH,\"%c%c%c%c%c%c\",%02XH\n", next+3, m_memory[next+3], 
 										m_memory[next+4], m_memory[next+5], m_memory[next+6], m_memory[next+7],
 										m_memory[next+8], m_memory[next+9], m_memory[next+10]);
 								else
-									sprintf(line, "    %sDB      %02XH,\"%c%c%c%c%c%c\",%02XH\n", pSpaces, m_memory[next+3], 
+									snprintf(line, sizeof(line), "    %sDB      %02XH,\"%c%c%c%c%c%c\",%02XH\n", pSpaces, m_memory[next+3], 
 										m_memory[next+4], m_memory[next+5], m_memory[next+6], m_memory[next+7],
 										m_memory[next+8], m_memory[next+9], m_memory[next+10]);
 							}
 							else
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   \"%c%c%c%c%c%c%c\",%02XH\n", next+3, m_memory[next+3], 
+									snprintf(line, sizeof(line), "%04XH  DB   \"%c%c%c%c%c%c%c\",%02XH\n", next+3, m_memory[next+3], 
 										m_memory[next+4], m_memory[next+5], m_memory[next+6], m_memory[next+7],
 										m_memory[next+8], m_memory[next+9], m_memory[next+10]);
 								else
-									sprintf(line, "    %sDB      \"%c%c%c%c%c%c%c\",%02XH\n", pSpaces, m_memory[next+3], 
+									snprintf(line, sizeof(line), "    %sDB      \"%c%c%c%c%c%c%c\",%02XH\n", pSpaces, m_memory[next+3], 
 										m_memory[next+4], m_memory[next+5], m_memory[next+6], m_memory[next+7],
 										m_memory[next+8], m_memory[next+9], m_memory[next+10]);
 							}
@@ -1474,12 +1474,12 @@ void VTDis::Disassemble()
 							if (count == 0)
 							{
 								if (oldSchool)
-									sprintf(line, "%04XH  DB   ", next);
+									snprintf(line, sizeof(line), "%04XH  DB   ", next);
 								else
-									sprintf(line, "    %sDB      ", pSpaces);
+									snprintf(line, sizeof(line), "    %sDB      ", pSpaces);
 							}
 
-							sprintf(arg, "%02XH", m_memory[next]);
+							snprintf(arg, sizeof(arg), "%02XH", m_memory[next]);
 							strcat(line, arg);
 							if ((next+1 != last) && (count != 7))
 								strcat(line, ",");
@@ -1552,13 +1552,13 @@ void VTDis::Disassemble()
 			// Print the address and opcode value to the temporary line buffer
 			if (oldSchool)
 			{
-				sprintf(line, "%04XH  (%02XH) ", c, opcode);
+				snprintf(line, sizeof(line), "%04XH  (%02XH) ", c, opcode);
 				strcat(line, gStrTable[opcode]);
 			}
 			else
 			{
 				if (m_includeOpcodes)
-					sprintf(line, "    (%02XH) ", opcode);
+					snprintf(line, sizeof(line), "    (%02XH) ", opcode);
 				else
 					strcpy(line, "    ");
 
@@ -1576,7 +1576,7 @@ void VTDis::Disassemble()
 						tricked_out = TRUE;
 
 						// Disassemble it as a DB instead
-						sprintf(line, "    %sDB      %02XH", pSpaces, opcode);
+						snprintf(line, sizeof(line), "    %sDB      %02XH", pSpaces, opcode);
 						strcat(line, "                        ; Tricked out ");
 					}
 				}
@@ -1601,7 +1601,7 @@ void VTDis::Disassemble()
 			if (op_len == 1)
 			{
 				// Single byte argument
-				sprintf(arg, "%02XH", m_memory[c+1]);
+				snprintf(arg, sizeof(arg), "%02XH", m_memory[c+1]);
 				strcat(line, arg);
 			}
 
@@ -1616,10 +1616,10 @@ void VTDis::Disassemble()
 					if (m_pDisType[addr].pLabel != NULL)
 						strcpy(arg, gDisStrings[m_pDisType[addr].idx].pLabel);
 					else
-						sprintf(arg, "L_%04XH", addr);
+						snprintf(arg, sizeof(arg), "L_%04XH", addr);
 				}
 				else
-					sprintf(arg, "%04XH", addr);
+					snprintf(arg, sizeof(arg), "%04XH", addr);
 				strcat(line, arg);
 			}
 
@@ -1812,15 +1812,15 @@ void VTDis::DisassembleAddLabel(My_Text_Buffer*	tb, int addr)
 		tb->append(line);
 		if (!m_oldSchool)
 		{
-			sprintf(arg, "%s:", gDisStrings[m_pDisType[addr].idx].pLabel);
-			sprintf(line, "%-39s%s; %04XH\n", arg, m_includeOpcodes ? "      " : "", addr);
+			snprintf(arg, sizeof(arg), "%s:", gDisStrings[m_pDisType[addr].idx].pLabel);
+			snprintf(line, sizeof(line), "%-39s%s; %04XH\n", arg, m_includeOpcodes ? "      " : "", addr);
 			tb->append(line);
 		}
 	}
 	else if (!m_oldSchool)
 	{
 		// Generate a label based on the address
-		sprintf(line, "L_%04XH:\n", addr);
+		snprintf(line, sizeof(line), "L_%04XH:\n", addr);
 		tb->append(line);
 	}
 }
@@ -1870,9 +1870,9 @@ void VTDis::DisassembleAsString(My_Text_Buffer*	tb, int startAddr, int len)
 			if (m_memory[next] == 0)
 			{
 				if (m_oldSchool)
-					sprintf(line, "%04XH  DB   00H\n", next);
+					snprintf(line, sizeof(line), "%04XH  DB   00H\n", next);
 				else
-					sprintf(line, "    %sDB      00H\n", pSpaces);
+					snprintf(line, sizeof(line), "    %sDB      00H\n", pSpaces);
 				tb->append(line);
 				line[0]=0;
 			}
@@ -1881,16 +1881,16 @@ void VTDis::DisassembleAsString(My_Text_Buffer*	tb, int startAddr, int len)
 				if (iscntrl(m_memory[next]) || m_memory[next] > '~')
 				{
 					if (m_oldSchool)
-						sprintf(line, "%04XH  DB   %02XH", next, m_memory[next]);
+						snprintf(line, sizeof(line), "%04XH  DB   %02XH", next, m_memory[next]);
 					else
-						sprintf(line, "    %sDB      %02XH", pSpaces, m_memory[next]);
+						snprintf(line, sizeof(line), "    %sDB      %02XH", pSpaces, m_memory[next]);
 				}
 				else
 				{
 					if (m_oldSchool)
-						sprintf(line, "%04XH  DB   \"%c", next, m_memory[next]);
+						snprintf(line, sizeof(line), "%04XH  DB   \"%c", next, m_memory[next]);
 					else
-						sprintf(line, "    %sDB      \"%c", pSpaces, m_memory[next]);
+						snprintf(line, sizeof(line), "    %sDB      \"%c", pSpaces, m_memory[next]);
 					quote_active = 1;
 				}
 				str_active = 1;
@@ -1905,16 +1905,16 @@ void VTDis::DisassembleAsString(My_Text_Buffer*	tb, int startAddr, int len)
 					strcat(line, "\"");
 					quote_active = 0;
 				}
-				sprintf(arg, ",%02XH", m_memory[next]);
+				snprintf(arg, sizeof(arg), ",%02XH", m_memory[next]);
 			}
 			else
 			{
 				if (!quote_active)
-					sprintf(arg, ",\"%c", m_memory[next]);
+					snprintf(arg, sizeof(arg), ",\"%c", m_memory[next]);
 				else if (m_memory[next] == '"')
-					sprintf(arg, "\\%c", m_memory[next]);
+					snprintf(arg, sizeof(arg), "\\%c", m_memory[next]);
 				else
-					sprintf(arg, "%c", m_memory[next]);
+					snprintf(arg, sizeof(arg), "%c", m_memory[next]);
 				quote_active = 1;
 			}
 			strcat(line, arg);
@@ -2055,7 +2055,7 @@ int VTDis::DisassembleLine(int address, char* line)
 	op_len = gLenTable[opcode] & 0x03;
 
 	// Print the address and opcode value to the temporary line buffer
-	sprintf(line, "%04XH  ", address + m_BaseAddress);
+	snprintf(line, sizeof(line), "%04XH  ", address + m_BaseAddress);
 
 	// Print the opcode text to the temp line buffer
 	strcat(line, gStrTable[opcode]);
@@ -2064,7 +2064,7 @@ int VTDis::DisassembleLine(int address, char* line)
 	if (op_len == 1)
 	{
 		// Single byte argument
-		sprintf(arg, "%02XH", get_memory8(address+1));
+		snprintf(arg, sizeof(arg), "%02XH", get_memory8(address+1));
 		strcat(line, arg);
 	}
 
@@ -2073,7 +2073,7 @@ int VTDis::DisassembleLine(int address, char* line)
 	{
 		// Double byte argument
 		addr = get_memory8(address+1) | (get_memory8(address+2) << 8);
-		sprintf(arg, "%04XH", addr);
+		snprintf(arg, sizeof(arg), "%04XH", addr);
 		strcat(line, arg);
 
 		if (m_WantComments)
@@ -2101,7 +2101,7 @@ int VTDis::DisassembleLine(int address, unsigned char opcode, unsigned short ope
 	op_len = gLenTable[opcode] & 0x03;
 
 	// Print the address and opcode value to the temporary line buffer
-	sprintf(line, "%04XH  ", address);
+	snprintf(line, sizeof(line), "%04XH  ", address);
 
 	// Print the opcode text to the temp line buffer
 	strcat(line, gStrTable[opcode]);
@@ -2110,7 +2110,7 @@ int VTDis::DisassembleLine(int address, unsigned char opcode, unsigned short ope
 	if (op_len == 1)
 	{
 		// Single byte argument
-		sprintf(arg, "%02XH", operand & 0xFF);
+		snprintf(arg, sizeof(arg), "%02XH", operand & 0xFF);
 		strcat(line, arg);
 	}
 
@@ -2118,7 +2118,7 @@ int VTDis::DisassembleLine(int address, unsigned char opcode, unsigned short ope
 	else if (op_len == 2)
 	{
 		// Double byte argument
-		sprintf(arg, "%04XH", operand);
+		snprintf(arg, sizeof(arg), "%04XH", operand);
 		strcat(line, arg);
 
 		if (m_WantComments)
@@ -2493,7 +2493,7 @@ void cb_setup(Fl_Widget* w, void* pOpaque)
 //	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 //	p.pDepth = new Fl_Input(160, 20, 80, 20, "");
 //	p.pDepth->align(FL_ALIGN_LEFT);
-//	sprintf(p.sDepth, "%d", gpDis->m_disassemblyDepth);
+//	snprintf(p.sDepth, sizeof(p.sDepth), "%d", gpDis->m_disassemblyDepth);
 //	p.pDepth->value(p.sDepth);
 
 	/* Create input field for font size */
@@ -2501,7 +2501,7 @@ void cb_setup(Fl_Widget* w, void* pOpaque)
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	p.pFontSize = new Fl_Input(120, 20, 60, 20, "");
 	p.pFontSize->align(FL_ALIGN_LEFT);
-	sprintf(p.sFontSize, "%d", gpDis->m_fontSize);
+	snprintf(p.sFontSize, sizeof(p.sFontSize), "%d", gpDis->m_fontSize);
 	p.pFontSize->value(p.sFontSize);
 
 	/* Create checkbox for hilight style */

@@ -1200,7 +1200,7 @@ void cb_about (Fl_Widget* w, void*)
       o->labelfont(8);
       o->labelsize(18);
     }
-    { Fl_Box* o = new Fl_Box(95, 265, 195, 25, "V "VERSION);
+    { Fl_Box* o = new Fl_Box(95, 265, 195, 25, "V " VERSION);
       o->labelfont(8);
       o->labelsize(18);
     }
@@ -2390,7 +2390,7 @@ void init_display(void)
 		if (inport(REMEM_MODE_PORT) & 0x01)
 		{
 			// Read the MMU Map
-			sprintf(temp, "Map:%d", (inport(REMEM_MODE_PORT) >> 3) & 0x07);
+			snprintf(temp, sizeof(temp), "Map:%d", (inport(REMEM_MODE_PORT) >> 3) & 0x07);
 			display_map_mode(temp);
 		}
 		else
@@ -2456,9 +2456,9 @@ void display_cpu_speed(void)
 
 	// If speed is less than 10 Mhz, then show 2 decimal places, else 1
 	if (cpu_speed + 0.5 < 10.0)
-		sprintf(label, "%4.2f Mhz", cpu_speed);
+		snprintf(label, sizeof(label), "%4.2f Mhz", cpu_speed);
 	else
-		sprintf(label, "%4.1f Mhz", cpu_speed + .05);
+		snprintf(label, sizeof(label), "%4.1f Mhz", cpu_speed + .05);
 	Fl::check();
 	gpSpeed->label(label);
 }
@@ -3551,7 +3551,7 @@ int T100_Disp::handle(int event)
 					}
 				}
 				// Test if we are in the menu
-				if (whichMenu = IsInMenu())
+				if ((whichMenu = IsInMenu()))
 				{
 					m_Select = FALSE;
 					// Test if mouse is in FKey area
@@ -4526,7 +4526,7 @@ int T100_Disp::handle(int event)
 			{
 				if (keylabel[0] != 0)
 					strcat(keylabel, "+");
-				sprintf(keystr, "'%c'", c);
+				snprintf(keystr, sizeof(keystr), "'%c'", c);
 
 				// Space shows up better written instead of ' '
 				if (c == 0x20)

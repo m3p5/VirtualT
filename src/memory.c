@@ -1065,7 +1065,7 @@ void save_remem_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not save Remem file %s", mem_setup.remem_file);
+		snprintf(msg, sizeof(msg), "Could not save Remem file %s", mem_setup.remem_file);
 		show_error(msg);
 		return;
 	}
@@ -1105,7 +1105,7 @@ void save_rampac_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not save Rampac file %s", mem_setup.rampac_file);
+		snprintf(msg, sizeof(msg), "Could not save Rampac file %s", mem_setup.rampac_file);
 		show_error(msg);
 		return;
 	}
@@ -1144,7 +1144,7 @@ void save_rex2_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not save REX2 RAM file %s", mem_setup.rex2_ram_file);
+		snprintf(msg, sizeof(msg), "Could not save REX2 RAM file %s", mem_setup.rex2_ram_file);
 		show_error(msg);
 		return;
 	}
@@ -1180,7 +1180,7 @@ void save_rex_flash(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not save REX file %s", mem_setup.rex_flash_file);
+		snprintf(msg, sizeof(msg), "Could not save REX file %s", mem_setup.rex_flash_file);
 		show_error(msg);
 		return;
 	}
@@ -1326,7 +1326,7 @@ void load_remem_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not open Remem file %s", mem_setup.remem_file);
+		snprintf(msg, sizeof(msg), "Could not open Remem file %s", mem_setup.remem_file);
 		show_error(msg);
 		return;
 	}
@@ -1401,7 +1401,7 @@ void load_rampac_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not open Rampac file %s", mem_setup.rampac_file);
+		snprintf(msg, sizeof(msg), "Could not open Rampac file %s", mem_setup.rampac_file);
 		show_error(msg);
 		return;
 	}
@@ -1438,7 +1438,7 @@ void load_rex_flash(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not open REX file %s", mem_setup.rex_flash_file);
+		snprintf(msg, sizeof(msg), "Could not open REX file %s", mem_setup.rex_flash_file);
 		show_error(msg);
 		return;
 	}
@@ -1478,7 +1478,7 @@ void load_rex2_ram(void)
 	if (fd == NULL)
 	{
 		char  msg[100];
-		sprintf(msg, "Could not open REX2 RAM file %s", mem_setup.rex2_ram_file);
+		snprintf(msg, sizeof(msg), "Could not open REX2 RAM file %s", mem_setup.rex2_ram_file);
 		show_error(msg);
 		return;
 	}
@@ -1559,7 +1559,7 @@ void load_ram(void)
 				gRamBank = 0;
 			    readlen = fread(rambanks, 1, RAMSIZE*4, fd);
                 memcpy(&gBaseMemory[RAMSTART], &rambanks[gRamBank*32768], RAMSIZE);
-                sprintf(sbank, "Bank %d", gRamBank+1);
+                snprintf(sbank, sizeof(sbank), "Bank %d", gRamBank+1);
                 display_map_mode(sbank);
             }
             else
@@ -1662,13 +1662,13 @@ void patch_vt_version(char* pMem, int size)
 	{
 		if (gModel == MODEL_PC8201 || gModel == MODEL_PC8300)
 		{
-			sprintf(newString, " VirtualT %s ", VERSION);
+			snprintf(newString, sizeof(newString), " VirtualT %s ", VERSION);
 			newString[14] = 0;
 			strcpy(oldString, "(C) Micro");
 		}
 		else
 		{
-			sprintf(newString, "VirtualT %s", VERSION);
+			snprintf(newString, sizeof(newString), "VirtualT %s", VERSION);
 			newString[12] = 0;
 			strcpy(oldString, "(C)Micro");
 		}
@@ -1872,7 +1872,7 @@ void set_ram_bank(unsigned char bank)
                 memcpy(&rambanks[gRamBank*RAMSIZE], &gBaseMemory[RAMSTART], RAMSIZE);
                 gRamBank = bank;
                 memcpy(&gBaseMemory[RAMSTART], &rambanks[gRamBank*RAMSIZE], RAMSIZE);
-                sprintf(sbank, "Bank %d", bank+1);
+                snprintf(sbank, sizeof(sbank), "Bank %d", bank+1);
                 display_map_mode(sbank);
             }
             break;

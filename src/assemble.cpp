@@ -2004,11 +2004,11 @@ void VTAssembler::directive_printf(const char *string, int hasEquation)
 		if (Evaluate(gEq, &value, 0))
 		{
 			if (fmtCh == 'f')
-				sprintf(str, string, value);
+				snprintf(str, sizeof(str), string, value);
 			else
 			{
 				lval = (int) value;
-				sprintf(str, string, lval);
+				snprintf(str, sizeof(str), string, lval);
 			}
 		}
 		else
@@ -2062,10 +2062,10 @@ void VTAssembler::directive_echo()
 		lval = (long) value;
 		value2 = lval;
 		if (value != value2)
-			sprintf(str, "%f", value2);
+			snprintf(str, sizeof(str), "%f", value2);
 		else
 		{
-			sprintf(str, "%ld", lval);
+			snprintf(str, sizeof(str), "%ld", lval);
 		}
 		if (m_pStdoutFunc != NULL)
 			m_pStdoutFunc(m_pStdoutContext, (const char *) str);
@@ -4840,7 +4840,7 @@ int VTAssembler::CreateObjFile(const char *filename, const char *sourcefile)
 
 				case RPN_VALUE:
 					// Add the operation code
-					sprintf(sval, "%f", op.m_Value);
+					snprintf(sval, sizeof(sval), "%f", op.m_Value);
                     len = strlen(sval);
                     while (sval[len-1] == '0')
                         sval[--len] = '\0';
@@ -5207,7 +5207,7 @@ void VTAssembler::Parse(MString filename)
 	ParseExternalDefines();
 
 	// Try to assemble the file
-	if (success = ParseASMFile(filename, this))
+	if ((success = ParseASMFile(filename, this)))
 	{
 		// Test if #ifdef stack is zero (mis-matched if / else / end
 		if (m_IfDepth != 0)
@@ -5222,7 +5222,7 @@ void VTAssembler::Parse(MString filename)
 		}
 
 		// No parse errors!  Try to assemble
-		else if (success = Assemble())
+		else if ((success = Assemble()))
 		{
 			// Get Output filename
 			temp = filename.Right(4);

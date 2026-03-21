@@ -650,16 +650,16 @@ int build_trace_line(int line, char* lineStr)
 
 	// Format flags string
 	unsigned char fl = pTrace->af & 0xFF;
-	sprintf(flags, "%c%c%c%c%c%c%c%c", fl & SF_BIT ?'S':' ', fl & ZF_BIT ?'Z':' ', fl & TS_BIT ?'T':' ',
+	snprintf(flags, sizeof(flags), "%c%c%c%c%c%c%c%c", fl & SF_BIT ?'S':' ', fl & ZF_BIT ?'Z':' ', fl & TS_BIT ?'T':' ',
 		fl & AC_BIT ? 'A':' ', fl & PF_BIT ? 'P':' ', fl & OV_BIT ? 'O':' ', fl & XF_BIT ? 'X':' ', 
 		fl & CF_BIT ? 'C':' ');
 
 	// Append regs after opcode
 	if (gcpuw->m_showAs16Bit)
-		sprintf(str, "A:%02X %s  BC:%04X  DE:%04X  HL:%04X  SP:%02X",
+		snprintf(str, sizeof(str), "A:%02X %s  BC:%04X  DE:%04X  HL:%04X  SP:%02X",
 			pTrace->af >> 8, flags, pTrace->bc, pTrace->de, pTrace->hl, pTrace->sp);
 	else
-		sprintf(str, "A:%02X %s  B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
+		snprintf(str, sizeof(str), "A:%02X %s  B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
 			pTrace->af >> 8, flags, pTrace->bc >> 8, pTrace->bc & 0xFF, pTrace->de >> 8, 
 			pTrace->de & 0xFF, pTrace->hl >> 8, pTrace->de & 0xFF, pTrace->sp);
 	strcat(lineStr, str);
@@ -711,7 +711,7 @@ void redraw_trace(Fl_Widget* w, void* pOpaque)
 		for (x = 0; x < lines; x++)
 		{
 			// Draw the Stack
-			sprintf(str, "%04X", get_memory16(SP+x*2));
+			snprintf(str, sizeof(str), "%04X", get_memory16(SP+x*2));
 			fl_draw(str, gcpuw->m_pStackBox->x()+6, trace_top+x*gcpuw->m_fontHeight);
 			if (gcpuw->m_colorSyntaxHilight)
 				fl_color(gcpuw->m_traceColors.number);
@@ -753,7 +753,7 @@ void redraw_trace(Fl_Widget* w, void* pOpaque)
 		for (x = 0; x < lines; x++)
 		{
 			// Draw the Stack
-			sprintf(str, "%04X", get_memory16(SP+x*2));
+			snprintf(str, sizeof(str), "%04X", get_memory16(SP+x*2));
 			fl_draw(str, gcpuw->m_pStackBox->x()+6, trace_top+x*gcpuw->m_fontHeight);
 
 			if (gcpuw->m_colorSyntaxHilight)
@@ -1142,55 +1142,55 @@ void debug_cpuregs_cb (int reason)
 		gDebugCount = 0;
 
 	// Update PC edit box
-	sprintf(str, gcpuw->m_sPCfmt, PC);
+	snprintf(str, sizeof(str), gcpuw->m_sPCfmt, PC);
 	gcpuw->m_pRegPC->value(str);
 
 	// Update SP edit box
-	sprintf(str, gcpuw->m_sSPfmt, SP);
+	snprintf(str, sizeof(str), gcpuw->m_sSPfmt, SP);
 	gcpuw->m_pRegSP->value(str);
 
 	// Update A edit box
-	sprintf(str, gcpuw->m_sAfmt, A);
+	snprintf(str, sizeof(str), gcpuw->m_sAfmt, A);
 	gcpuw->m_pRegA->value(str);
 
 	// Update B edit box
-	sprintf(str, gcpuw->m_sBfmt, B);
+	snprintf(str, sizeof(str), gcpuw->m_sBfmt, B);
 	gcpuw->m_pRegB->value(str);
 
 	// Update C edit box
-	sprintf(str, gcpuw->m_sCfmt, C);
+	snprintf(str, sizeof(str), gcpuw->m_sCfmt, C);
 	gcpuw->m_pRegC->value(str);
 
 	// Update D edit box
-	sprintf(str, gcpuw->m_sDfmt, D);
+	snprintf(str, sizeof(str), gcpuw->m_sDfmt, D);
 	gcpuw->m_pRegD->value(str);
 
 	// Update E edit box
-	sprintf(str, gcpuw->m_sEfmt, E);
+	snprintf(str, sizeof(str), gcpuw->m_sEfmt, E);
 	gcpuw->m_pRegE->value(str);
 
 	// Update H edit box
-	sprintf(str, gcpuw->m_sHfmt, H);
+	snprintf(str, sizeof(str), gcpuw->m_sHfmt, H);
 	gcpuw->m_pRegH->value(str);
 
 	// Update L edit box
-	sprintf(str, gcpuw->m_sLfmt, L);
+	snprintf(str, sizeof(str), gcpuw->m_sLfmt, L);
 	gcpuw->m_pRegL->value(str);
 
 	// Update BC edit box
-	sprintf(str, gcpuw->m_sBCfmt, BC);
+	snprintf(str, sizeof(str), gcpuw->m_sBCfmt, BC);
 	gcpuw->m_pRegBC->value(str);
 
 	// Update DE edit box
-	sprintf(str, gcpuw->m_sDEfmt, DE);
+	snprintf(str, sizeof(str), gcpuw->m_sDEfmt, DE);
 	gcpuw->m_pRegDE->value(str);
 
 	// Update HL edit box
-	sprintf(str, gcpuw->m_sHLfmt, HL);
+	snprintf(str, sizeof(str), gcpuw->m_sHLfmt, HL);
 	gcpuw->m_pRegHL->value(str);
 
 	// Update M edit box
-	sprintf(str, gcpuw->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), gcpuw->m_sMfmt, get_m());
 	gcpuw->m_pRegM->value(str);
 
 	// Update flags
@@ -1240,15 +1240,15 @@ void debug_cpuregs_cb (int reason)
 			strcat(gcpuw->m_sInstTrace[gcpuw->m_iInstTraceHead], " ");
 
 		// Format flags string
-		sprintf(flags, "%c%c%c%c%c%c%c%c", SF?'S':' ', ZF?'Z':' ', TS?'T':' ',AC?'A':' ',
+		snprintf(flags, sizeof(flags), "%c%c%c%c%c%c%c%c", SF?'S':' ', ZF?'Z':' ', TS?'T':' ',AC?'A':' ',
 			PF?'P':' ',OV?'O':' ',XF?'X':' ', CF?'C':' ');
 
 		// Append regs after opcode
 		if (gcpuw->m_showAs16Bit)
-			sprintf(str, "A:%02X %s  BC:%04X  DE:%04X  HL:%04X  SP:%02X",
+			snprintf(str, sizeof(str), "A:%02X %s  BC:%04X  DE:%04X  HL:%04X  SP:%02X",
 				A, flags, BC, DE, HL, SP);
 		else		
-			sprintf(str, "A:%02X %s  B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
+			snprintf(str, sizeof(str), "A:%02X %s  B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
 				A, flags, B, C, D, E, H, L, SP);
 		strcat(gcpuw->m_sInstTrace[gcpuw->m_iInstTraceHead++], str);
 
@@ -1518,11 +1518,11 @@ void cb_reg_pc_changed(Fl_Widget* w, void* pOpaque)
 		strcat(pCpuRegs->m_sInstTrace[trace_tail], " ");
 
 	// Format flags string
-	sprintf(flags, "%c%c%c%c%c%c%c%c", SF?'S':' ', ZF?'Z':' ', TS?'T':' ',AC?'A':' ',
+	snprintf(flags, sizeof(flags), "%c%c%c%c%c%c%c%c", SF?'S':' ', ZF?'Z':' ', TS?'T':' ',AC?'A':' ',
 		PF?'P':' ',OV?'O':' ',XF?'X':' ', CF?'C':' ');
 
 	// Append regs after opcode
-	sprintf(str, "A:%02X %s B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
+	snprintf(str, sizeof(str), "A:%02X %s B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%02X",
 		A, flags, B, C, D, E, H, L, SP);
 	strcat(pCpuRegs->m_sInstTrace[trace_tail], str);
 
@@ -1549,11 +1549,11 @@ void cb_reg_bc_changed(Fl_Widget* w, void* pOpaque)
 	C = new_bc & 0xFF;
 
 	// Update B edit box
-	sprintf(str, pCpuRegs->m_sBfmt, B);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBfmt, B);
 	pCpuRegs->m_pRegB->value(str);
 
 	// Update C edit box
-	sprintf(str, pCpuRegs->m_sCfmt, C);
+	snprintf(str, sizeof(str), pCpuRegs->m_sCfmt, C);
 	pCpuRegs->m_pRegC->value(str);
 }
 
@@ -1572,11 +1572,11 @@ void cb_reg_b_changed(Fl_Widget* w, void* pOpaque)
 	B = str_to_i(pStr);
 
 	// Update B edit box
-	sprintf(str, pCpuRegs->m_sBfmt, B);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBfmt, B);
 	pCpuRegs->m_pRegB->value(str);
 
 	// Update BC edit box
-	sprintf(str, pCpuRegs->m_sBCfmt, BC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBCfmt, BC);
 	pCpuRegs->m_pRegBC->value(str);
 }
 
@@ -1595,11 +1595,11 @@ void cb_reg_c_changed(Fl_Widget* w, void* pOpaque)
 	C = str_to_i(pStr);
 
 	// Update C edit box
-	sprintf(str, pCpuRegs->m_sCfmt, C);
+	snprintf(str, sizeof(str), pCpuRegs->m_sCfmt, C);
 	pCpuRegs->m_pRegC->value(str);
 
 	// Update BC edit box
-	sprintf(str, pCpuRegs->m_sBCfmt, BC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBCfmt, BC);
 	pCpuRegs->m_pRegBC->value(str);
 }
 
@@ -1622,11 +1622,11 @@ void cb_reg_de_changed(Fl_Widget* w, void* pOpaque)
 	E = new_de & 0xFF;
 
 	// Update D edit box
-	sprintf(str, pCpuRegs->m_sDfmt, D);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDfmt, D);
 	pCpuRegs->m_pRegD->value(str);
 
 	// Update E edit box
-	sprintf(str, pCpuRegs->m_sEfmt, E);
+	snprintf(str, sizeof(str), pCpuRegs->m_sEfmt, E);
 	pCpuRegs->m_pRegE->value(str);
 }
 
@@ -1645,11 +1645,11 @@ void cb_reg_d_changed(Fl_Widget* w, void* pOpaque)
 	D = str_to_i(pStr);
 
 	// Update B edit box
-	sprintf(str, pCpuRegs->m_sDfmt, D);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDfmt, D);
 	pCpuRegs->m_pRegD->value(str);
 
 	// Update BC edit box
-	sprintf(str, pCpuRegs->m_sDEfmt, DE);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDEfmt, DE);
 	pCpuRegs->m_pRegDE->value(str);
 }
 
@@ -1668,11 +1668,11 @@ void cb_reg_e_changed(Fl_Widget* w, void* pOpaque)
 	E = str_to_i(pStr);
 
 	// Update C edit box
-	sprintf(str, pCpuRegs->m_sEfmt, E);
+	snprintf(str, sizeof(str), pCpuRegs->m_sEfmt, E);
 	pCpuRegs->m_pRegE->value(str);
 
 	// Update DE edit box
-	sprintf(str, pCpuRegs->m_sDEfmt, DE);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDEfmt, DE);
 	pCpuRegs->m_pRegDE->value(str);
 }
 
@@ -1695,15 +1695,15 @@ void cb_reg_hl_changed(Fl_Widget* w, void* pOpaque)
 	L = new_hl & 0xFF;
 
 	// Update H edit box
-	sprintf(str, pCpuRegs->m_sHfmt, H);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHfmt, H);
 	pCpuRegs->m_pRegH->value(str);
 
 	// Update L edit box
-	sprintf(str, pCpuRegs->m_sLfmt, L);
+	snprintf(str, sizeof(str), pCpuRegs->m_sLfmt, L);
 	pCpuRegs->m_pRegL->value(str);
 
 	// Update M edit box
-	sprintf(str, pCpuRegs->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), pCpuRegs->m_sMfmt, get_m());
 	pCpuRegs->m_pRegM->value(str);
 
 }
@@ -1723,15 +1723,15 @@ void cb_reg_h_changed(Fl_Widget* w, void* pOpaque)
 	H = str_to_i(pStr);
 
 	// Update H edit box
-	sprintf(str, pCpuRegs->m_sHfmt, H);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHfmt, H);
 	pCpuRegs->m_pRegH->value(str);
 
 	// Update HL edit box
-	sprintf(str, pCpuRegs->m_sHLfmt, HL);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHLfmt, HL);
 	pCpuRegs->m_pRegHL->value(str);
 
 	// Update M edit box
-	sprintf(str, pCpuRegs->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), pCpuRegs->m_sMfmt, get_m());
 	pCpuRegs->m_pRegM->value(str);
 
 }
@@ -1751,15 +1751,15 @@ void cb_reg_l_changed(Fl_Widget* w, void* pOpaque)
 	L = str_to_i(pStr);
 
 	// Update H edit box
-	sprintf(str, pCpuRegs->m_sLfmt, L);
+	snprintf(str, sizeof(str), pCpuRegs->m_sLfmt, L);
 	pCpuRegs->m_pRegL->value(str);
 
 	// Update HL edit box
-	sprintf(str, pCpuRegs->m_sHLfmt, HL);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHLfmt, HL);
 	pCpuRegs->m_pRegHL->value(str);
 
 	// Update M edit box
-	sprintf(str, pCpuRegs->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), pCpuRegs->m_sMfmt, get_m());
 	pCpuRegs->m_pRegM->value(str);
 
 }
@@ -1815,7 +1815,7 @@ void cb_reg_a_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sAfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sAfmt, A);
+	snprintf(str, sizeof(str), pCpuRegs->m_sAfmt, A);
 	pCpuRegs->m_pRegA->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1833,7 +1833,7 @@ void cb_reg_a_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sAfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sAfmt, A);
+	snprintf(str, sizeof(str), pCpuRegs->m_sAfmt, A);
 	pCpuRegs->m_pRegA->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1851,7 +1851,7 @@ void cb_reg_b_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sBfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sBfmt, B);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBfmt, B);
 	pCpuRegs->m_pRegB->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1869,7 +1869,7 @@ void cb_reg_b_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sBfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sBfmt, B);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBfmt, B);
 	pCpuRegs->m_pRegB->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1887,7 +1887,7 @@ void cb_reg_c_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sCfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sCfmt, C);
+	snprintf(str, sizeof(str), pCpuRegs->m_sCfmt, C);
 	pCpuRegs->m_pRegC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1905,7 +1905,7 @@ void cb_reg_c_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sCfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sCfmt, C);
+	snprintf(str, sizeof(str), pCpuRegs->m_sCfmt, C);
 	pCpuRegs->m_pRegC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1923,7 +1923,7 @@ void cb_reg_d_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sDfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sDfmt, D);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDfmt, D);
 	pCpuRegs->m_pRegD->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1941,7 +1941,7 @@ void cb_reg_d_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sDfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sDfmt, D);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDfmt, D);
 	pCpuRegs->m_pRegD->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1959,7 +1959,7 @@ void cb_reg_e_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sEfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sEfmt, E);
+	snprintf(str, sizeof(str), pCpuRegs->m_sEfmt, E);
 	pCpuRegs->m_pRegE->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1977,7 +1977,7 @@ void cb_reg_e_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sEfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sEfmt, E);
+	snprintf(str, sizeof(str), pCpuRegs->m_sEfmt, E);
 	pCpuRegs->m_pRegE->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -1995,7 +1995,7 @@ void cb_reg_h_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sHfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sHfmt, H);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHfmt, H);
 	pCpuRegs->m_pRegH->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2013,7 +2013,7 @@ void cb_reg_h_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sHfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sHfmt, H);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHfmt, H);
 	pCpuRegs->m_pRegH->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2031,7 +2031,7 @@ void cb_reg_l_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sLfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sLfmt, L);
+	snprintf(str, sizeof(str), pCpuRegs->m_sLfmt, L);
 	pCpuRegs->m_pRegL->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2049,7 +2049,7 @@ void cb_reg_l_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sLfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sLfmt, L);
+	snprintf(str, sizeof(str), pCpuRegs->m_sLfmt, L);
 	pCpuRegs->m_pRegL->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2067,7 +2067,7 @@ void cb_reg_pc_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sPCfmt,  "0x%04X");
-	sprintf(str, pCpuRegs->m_sPCfmt, PC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sPCfmt, PC);
 	pCpuRegs->m_pRegPC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2085,7 +2085,7 @@ void cb_reg_pc_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sPCfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sPCfmt, PC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sPCfmt, PC);
 	pCpuRegs->m_pRegPC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2103,7 +2103,7 @@ void cb_reg_sp_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sSPfmt,  "0x%04X");
-	sprintf(str, pCpuRegs->m_sSPfmt, SP);
+	snprintf(str, sizeof(str), pCpuRegs->m_sSPfmt, SP);
 	pCpuRegs->m_pRegSP->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2121,7 +2121,7 @@ void cb_reg_sp_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sSPfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sSPfmt, SP);
+	snprintf(str, sizeof(str), pCpuRegs->m_sSPfmt, SP);
 	pCpuRegs->m_pRegSP->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2139,7 +2139,7 @@ void cb_reg_bc_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sBCfmt,  "0x%04X");
-	sprintf(str, pCpuRegs->m_sBCfmt, BC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBCfmt, BC);
 	pCpuRegs->m_pRegBC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2157,7 +2157,7 @@ void cb_reg_bc_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sBCfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sBCfmt, BC);
+	snprintf(str, sizeof(str), pCpuRegs->m_sBCfmt, BC);
 	pCpuRegs->m_pRegBC->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2175,7 +2175,7 @@ void cb_reg_de_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sDEfmt,  "0x%04X");
-	sprintf(str, pCpuRegs->m_sDEfmt, DE);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDEfmt, DE);
 	pCpuRegs->m_pRegDE->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2193,7 +2193,7 @@ void cb_reg_de_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sDEfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sDEfmt, DE);
+	snprintf(str, sizeof(str), pCpuRegs->m_sDEfmt, DE);
 	pCpuRegs->m_pRegDE->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2211,7 +2211,7 @@ void cb_reg_hl_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sHLfmt,  "0x%04X");
-	sprintf(str, pCpuRegs->m_sHLfmt, HL);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHLfmt, HL);
 	pCpuRegs->m_pRegHL->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2229,7 +2229,7 @@ void cb_reg_hl_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sHLfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sHLfmt, HL);
+	snprintf(str, sizeof(str), pCpuRegs->m_sHLfmt, HL);
 	pCpuRegs->m_pRegHL->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2247,7 +2247,7 @@ void cb_reg_m_hex(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sMfmt,  "0x%02X");
-	sprintf(str, pCpuRegs->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), pCpuRegs->m_sMfmt, get_m());
 	pCpuRegs->m_pRegM->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -2265,7 +2265,7 @@ void cb_reg_m_dec(Fl_Widget* w, void* pOpaque)
 	VTCpuRegs*	pCpuRegs = (VTCpuRegs *) pOpaque;
 
 	strcpy(pCpuRegs->m_sMfmt,  "%d");
-	sprintf(str, pCpuRegs->m_sMfmt, get_m());
+	snprintf(str, sizeof(str), pCpuRegs->m_sMfmt, get_m());
 	pCpuRegs->m_pRegM->value(str);
 
 	pCpuRegs->m_pAllHex->value(0);
@@ -3321,22 +3321,22 @@ int VTCpuRegs::handle(int eventId)
 		else if (key == FL_F + 1)
 		{
 			m_pBreak1->take_focus();
-			m_pBreak1->position(0, m_pBreak1->size());
+				m_pBreak1->insert_position(0, m_pBreak1->size());
 		}
 		else if (key == FL_F + 2)
 		{
 			m_pBreak2->take_focus();
-			m_pBreak2->position(0, m_pBreak2->size());
+				m_pBreak2->insert_position(0, m_pBreak2->size());
 		}
 		else if (key == FL_F + 3)
 		{
 			m_pBreak3->take_focus();
-			m_pBreak3->position(0, m_pBreak3->size());
+				m_pBreak3->insert_position(0, m_pBreak3->size());
 		}
 		else if (key == FL_F + 4)
 		{
 			m_pBreak4->take_focus();
-			m_pBreak4->position(0, m_pBreak4->size());
+				m_pBreak4->insert_position(0, m_pBreak4->size());
 		}
 		else if (key == FL_F + 7)
 		{
@@ -3747,7 +3747,7 @@ void cb_setup_trace(Fl_Widget* w, void* pOpaque)
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	p.pTraceDepth = new Fl_Input(120, 20, 80, 20, "");
 	p.pTraceDepth->align(FL_ALIGN_LEFT);
-	sprintf(p.sDepth, "%d", gcpuw->m_traceCount);
+	snprintf(p.sDepth, sizeof(p.sDepth), "%d", gcpuw->m_traceCount);
 	p.pTraceDepth->value(p.sDepth);
 	b = new Fl_Box(210, 20, 100, 20, "64M max");
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
@@ -3757,7 +3757,7 @@ void cb_setup_trace(Fl_Widget* w, void* pOpaque)
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	p.pFontSize = new Fl_Input(120, 50, 60, 20, "");
 	p.pFontSize->align(FL_ALIGN_LEFT);
-	sprintf(p.sFontSize, "%d", gcpuw->m_fontSize);
+	snprintf(p.sFontSize, sizeof(p.sFontSize), "%d", gcpuw->m_fontSize);
 	p.pFontSize->value(p.sFontSize);
 
 	/* Create checkbox for hilight style */

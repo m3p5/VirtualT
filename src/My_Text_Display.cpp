@@ -2269,7 +2269,7 @@ void My_Text_Display::draw_line_numbers(bool clearAll) {
 	lineStart = textD->lineStarts[visLine];
 	if (lineStart != -1 && (lineStart==0 ||
 		BufGetCharacter(textD->buffer, lineStart-1)=='\n')) {
-	    sprintf(lineNumString, "%*d", nCols, line);
+	    snprintf(lineNumString, sizeof(lineNumString), "%*d", nCols, line);
 	    XDrawImageString(XtDisplay(textD->w), XtWindow(textD->w),
 		    textD->lineNumGC, textD->lineNumLeft, y + textD->ascent,
 		    lineNumString, strlen(lineNumString));

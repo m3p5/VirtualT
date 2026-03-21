@@ -277,7 +277,14 @@ int init_throttle_timer(void)
     // Initialize thread processing
     pthread_mutex_init(&gThrottleLock, NULL);
     pthread_create(&gThrottleThread, NULL, ThrottlePeriodProc, NULL);
+#if defined(__APPLE__) && defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
     sem_init(&gThrottleEvent, 0, 0);
+#if defined(__APPLE__) && defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 #endif
 
@@ -658,7 +665,7 @@ void check_installation(void)
 		/* ROM file doesn't exist.  Try to open in ROMs dir */
 		get_rom_path(localpath, model);
 #if defined(__APPLE__)
-		sprintf(roms_path, "%sROMs%s", path, strrchr(localpath, '/'));
+		snprintf(roms_path, sizeof(roms_path), "%sROMs%s", path, strrchr(localpath, '/'));
 		
 		/* Test if the ROM file exists in the working directory */
 		if (stat(roms_path, &romStat) != 0)
@@ -666,11 +673,11 @@ void check_installation(void)
 			/* Test if running from a bundle & get the bundle path */
 			if (strlen(gOsxBundlePath) > 0)
 			{
-				sprintf(roms_path, "%s/Resources%s", gOsxBundlePath, strrchr(localpath, '/'));
+				snprintf(roms_path, sizeof(roms_path), "%s/Resources%s", gOsxBundlePath, strrchr(localpath, '/'));
 			}
 		}
 #else
-		sprintf(roms_path, "ROMs%s", strrchr(localpath, '/'));
+		snprintf(roms_path, sizeof(roms_path), "ROMs%s", strrchr(localpath, '/'));
 #endif
 
 		if ((fd = fopen(roms_path, "rb")) == NULL)
@@ -720,7 +727,7 @@ void check_installation(void)
 
 	if (strlen(errors) > 0)
 	{
-		sprintf(localpath, "No ROM file for %s", errors);
+		snprintf(localpath, sizeof(localpath), "No ROM file for %s", errors);
 		show_error(localpath);
 	}
 }

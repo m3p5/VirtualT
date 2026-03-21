@@ -58,8 +58,13 @@ endif
 # ================================
 # Define our linker flags and libs
 # ================================
-LDFLAGS		+=	$(shell $(FLTKCONFIG) --use-images --ldflags) -L/usr/X11R6/lib
-LIBFILES	=	-lstdc++ $(FLTKLIB) -lm -lc -lX11 -lpthread -ldl -ljpeg -lpng -lXft -lXinerama -lfontconfig -lXext
+LDFLAGS		+=	$(shell $(FLTKCONFIG) --use-images --ldflags)
+LIBFILES	?=	-lstdc++ $(FLTKLIB) -lm -lc -lX11 -lpthread -ldl -ljpeg -lpng -lXft -lXinerama -lfontconfig -lXext
+
+ifeq ($(shell uname),Darwin)
+FLTKLIB		:=	$(filter-out -L/opt/homebrew/Cellar/libpng/%/lib,$(FLTKLIB))
+LDFLAGS		:=	$(filter-out -L/opt/homebrew/Cellar/libpng/%/lib,$(LDFLAGS))
+endif
 
 # =============================
 # Defines for MacOSX builds
@@ -126,17 +131,7 @@ else
 		fi; \
 	done
 	@echo "Linking" $(VIRTUALT)
-	if test -f /Developer/Tools/Rez; then \
-		g++ $(MACLDFLAGS) $(OBJECTS) $(MACLIBFILES) -o $@ ; \
-	else \
-		$(CC) $(LDFLAGS) $(OBJECTS) $(LIBFILES) -o $@ ; \
-	fi;
-	cd ..
-
-	# If bulding on MacOS, post the resource file to the executable
-	if test -f /Developer/Tools/Rez; then \
-		$(POSTBUILD) $(VIRTUALT); \
-	fi;
+	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBFILES) -o $@
 endif
 
 # ========================
@@ -149,12 +144,7 @@ ifndef FLTKLIB
 	exit 1
 else
 	@echo "Linking" $(CLIENT)
-	if test -f /Developer/Tools/Rez; then \
-		g++ $(MACLDFLAGS) $(CLIENT_OBJS) $(MACLIBFILES) -o $@ ; \
-	else \
-		$(CC) $(LDFLAGS) $(CLIENT_OBJS) $(LIBFILES) -o $@ ; \
-	fi
-	cd ..
+	$(CC) $(LDFLAGS) $(CLIENT_OBJS) $(LIBFILES) -o $@
 endif
 
 # ============================================================

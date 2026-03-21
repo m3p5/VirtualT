@@ -448,31 +448,31 @@ void VT_Watch_Table::FormatVarValue(CWatchDef* pVar, char* str, int len)
 	case WATCH_TYPE_UCHAR:
 	default:
 		if (pVar->m_Value >= ' ' && pVar->m_Value <= '~')
-			sprintf(str, "%d '%c'", (unsigned char) pVar->m_Value, pVar->m_Value);
+			snprintf(str, sizeof(str), "%d '%c'", (unsigned char) pVar->m_Value, pVar->m_Value);
 		else
-			sprintf(str, "%d", (unsigned char) pVar->m_Value);
+			snprintf(str, sizeof(str), "%d", (unsigned char) pVar->m_Value);
 		break;
 	case WATCH_TYPE_USHORT:
-		sprintf(str, "%d", (unsigned short) pVar->m_Value);
+		snprintf(str, sizeof(str), "%d", (unsigned short) pVar->m_Value);
 		break;		
 	case WATCH_TYPE_HEXCHAR:
 		if (pVar->m_Value >= ' ' && pVar->m_Value <= '~')
-			sprintf(str, "%02XH '%c'", (unsigned char) pVar->m_Value, (char) pVar->m_Value);
+			snprintf(str, sizeof(str), "%02XH '%c'", (unsigned char) pVar->m_Value, (char) pVar->m_Value);
 		else
-			sprintf(str, "%02XH", (unsigned char) pVar->m_Value);
+			snprintf(str, sizeof(str), "%02XH", (unsigned char) pVar->m_Value);
 		break;
 	case WATCH_TYPE_SCHAR:
 		if (pVar->m_Value > 127)
-			sprintf(str, "%d", pVar->m_Value-256);
+			snprintf(str, sizeof(str), "%d", pVar->m_Value-256);
 		else
-			sprintf(str, "%d", pVar->m_Value);
+			snprintf(str, sizeof(str), "%d", pVar->m_Value);
 		break;		
 	case WATCH_TYPE_SSHORT:
 		shortval = (short) pVar->m_Value;
-		sprintf(str, "%d", shortval);
+		snprintf(str, sizeof(str), "%d", shortval);
 		break;		
 	case WATCH_TYPE_HEXSHORT:
-		sprintf(str, "%04XH", (unsigned short) pVar->m_Value);
+		snprintf(str, sizeof(str), "%04XH", (unsigned short) pVar->m_Value);
 		break;
 
 	case WATCH_TYPE_STRING:
@@ -539,9 +539,9 @@ void VT_Watch_Table::DrawWatch(CWatchDef* pVar, int line)
 	if (line+topLine != m_SelLine)
 		fl_color(m_colors.address);
 	if (pVar->m_iAddr > 0xFFFF)
-		sprintf(str, "%06XH", pVar->m_iAddr);
+		snprintf(str, sizeof(str), "%06XH", pVar->m_iAddr);
 	else
-		sprintf(str, "%04XH", pVar->m_iAddr);
+		snprintf(str, sizeof(str), "%04XH", pVar->m_iAddr);
 	fl_draw(str, m_ColStart[2]+xOffset, wy + (line+1) * fontHeight+yOffset);
 
 	// Draw the type
@@ -1492,15 +1492,15 @@ void VT_Watch_Table::HandleDoubleClick(int field, int line)
 				{
 					// Format in either HEX or decimal format
 					if (pVar->m_Type == WATCH_TYPE_HEXCHAR)
-						sprintf(str, "%02XH", pVar->m_Value);
+						snprintf(str, sizeof(str), "%02XH", pVar->m_Value);
 					else if (pVar->m_Type == WATCH_TYPE_HEXSHORT)
-						sprintf(str, "%04XH", pVar->m_Value);
+						snprintf(str, sizeof(str), "%04XH", pVar->m_Value);
 					else if (pVar->m_Type == WATCH_TYPE_SCHAR)
-						sprintf(str, "%d", pVar->m_Value > 127 ? pVar->m_Value - 256 : pVar->m_Value);
+						snprintf(str, sizeof(str), "%d", pVar->m_Value > 127 ? pVar->m_Value - 256 : pVar->m_Value);
 					else if (pVar->m_Type == WATCH_TYPE_SSHORT)
-						sprintf(str, "%d", pVar->m_Value > 32767 ? pVar->m_Value - 65536 : pVar->m_Value);
+						snprintf(str, sizeof(str), "%d", pVar->m_Value > 32767 ? pVar->m_Value - 65536 : pVar->m_Value);
 					else
-						sprintf(str, "%d", pVar->m_Value);
+						snprintf(str, sizeof(str), "%d", pVar->m_Value);
 					m_pPopupInput->value(str);
 				}
 
@@ -1515,7 +1515,7 @@ void VT_Watch_Table::HandleDoubleClick(int field, int line)
 		// Show the popup input
 		m_pPopupInput->show();
 		m_pPopupInput->take_focus();
-		m_pPopupInput->position(0);
+		m_pPopupInput->insert_position(0);
 		m_pPopupInput->mark(999999);
 	}
 
@@ -1960,7 +1960,7 @@ int VT_TableInput::handle(int event)
 	{
 	case FL_FOCUS:
 		// On focus, always select the text
-		position(0);
+		insert_position(0);
 		mark(9999);
 		break;
 

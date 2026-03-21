@@ -126,7 +126,7 @@ void VTFilePrint::OpenNextPage()
 		m_OutFd = fopen((const char *) filename, "wb+");
 		if (m_OutFd == NULL)
 		{
-			sprintf(str, "Unable to open file %s", (const char *) filename);
+			snprintf(str, sizeof(str), "Unable to open file %s", (const char *) filename);
 			AddError(str);
 		}
 		else
@@ -146,7 +146,7 @@ void VTFilePrint::OpenNextPage()
 			m_OutFd = fopen((const char *) m_Filename, "wb+");
 			if (m_OutFd == NULL)
 			{
-				sprintf(str, "Unable to open file %s", (const char *) filename);
+				snprintf(str, sizeof(str), "Unable to open file %s", (const char *) filename);
 				AddError(str);
 			}
 			else
@@ -419,7 +419,7 @@ MString VTFilePrint::GenFilename()
 			else if (m_FormatCode[c+1] == 'p')
 			{
 				// Add page number
-				sprintf(page, "%d", m_PageNum);
+				snprintf(page, sizeof(page), "%d", m_PageNum);
 				if (seqFound)
 					afterSeq += page;
 				else
@@ -449,7 +449,7 @@ MString VTFilePrint::GenFilename()
 			for (seq = 0; ;seq++)
 			{
 				// Build filename for testing
-				sprintf(page, "%d", seq);
+				snprintf(page, sizeof(page), "%d", seq);
 				filename = m_DirName;
 				filename += beforeSeq + page + afterSeq;
 
@@ -467,7 +467,7 @@ MString VTFilePrint::GenFilename()
 		}
 
 		// Build the filename
-		sprintf(page, "%d", m_ActiveSeqNum);
+		snprintf(page, sizeof(page), "%d", m_ActiveSeqNum);
 		filename = m_DirName + beforeSeq + page + afterSeq;
 	}
 	else
@@ -494,7 +494,7 @@ int VTFilePrint::PromptFilename(MString& filename)
 		if (m_PageNum == 1)
 			strcpy(text, "Selet Output File for Print");
 		else
-			sprintf(text, "Select File for Page %d", m_PageNum);
+			snprintf(text, sizeof(text), "Select File for Page %d", m_PageNum);
 
 		// Prompt the user with the filename & give a chance to change
 		fl_cursor(FL_CURSOR_WAIT);
@@ -579,7 +579,7 @@ int VTFilePrint::OpenSession(void)
 	// Try to open the file
 	if ((m_OutFd = fopen((const char *) filename, "wb+")) == NULL)
 	{
-		sprintf(str, "Unable to open file %s", (const char *) filename);
+		snprintf(str, sizeof(str), "Unable to open file %s", (const char *) filename);
 		m_errors.Add(str);
 		return PRINT_ERROR_IO_ERROR;
 	}
@@ -807,7 +807,7 @@ void VTFilePrint::UpdateMonTab(int forceUpdate)
 			m_pStatFilename->label(m_sStatFilename);
 		}
 		// Update sequence number
-		sprintf(temp, "%d", m_ActiveSeqNum);
+		snprintf(temp, sizeof(temp), "%d", m_ActiveSeqNum);
 		if ((strcmp(m_sStatSessionSeq, temp) != 0) || forceUpdate)
 		{
 			strcpy(m_sStatSessionSeq, temp);
@@ -816,7 +816,7 @@ void VTFilePrint::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update bytes written
-	sprintf(temp, "%d", m_Bytes);
+	snprintf(temp, sizeof(temp), "%d", m_Bytes);
 	if ((strcmp(m_sStatBytes, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatBytes, temp);
@@ -824,7 +824,7 @@ void VTFilePrint::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update Number of pages
-	sprintf(m_sStatPages, "%d", m_PageNum);
+	snprintf(m_sStatPages, sizeof(m_sStatPages), "%d", m_PageNum);
 	m_pStatPages->label(m_sStatPages);
 }
 

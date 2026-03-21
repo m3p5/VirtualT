@@ -268,7 +268,7 @@ void VTTDockVid::CalcScreenCoords(void)
 
 	// If the display is framed, then calculate the frame coords
     
-	if (DisplayMode && 0)
+    if (0)
 	{
 		// Calculate the Bezel location
 		int		wantedH = 20;

@@ -321,7 +321,7 @@ void VTCharacterGen::ChangeActiveChar(int index)
 	unsigned char	ored;
 
 	m_pCharTable->SetActiveChar(index);
-	sprintf(m_CharText, "0x%02X", index);
+	snprintf(m_CharText, sizeof(m_CharText), "0x%02X", index);
 	m_pCharText->label(m_CharText);
 
 	SaveActiveChar();

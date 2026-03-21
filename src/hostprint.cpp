@@ -177,7 +177,7 @@ int VTHostPrint::OpenSession(void)
 		// Check for error opening port
 		if (m_OutFd == INVALID_HANDLE_VALUE)
 		{
-			sprintf(str, "Error opening port %s", m_HostPort);
+			snprintf(str, sizeof(str), "Error opening port %s", m_HostPort);
 			AddError(str);
 			return PRINT_ERROR_IO_ERROR;
 		}
@@ -187,7 +187,7 @@ int VTHostPrint::OpenSession(void)
 		m_OutFd = open(m_HostPort, O_RDWR);
 		if (m_OutFd == -1)
 		{
-			sprintf(str, "Error - unable to open %s", m_HostPort);
+			snprintf(str, sizeof(str), "Error - unable to open %s", m_HostPort);
 			AddError(str);
 			return PRINT_ERROR_IO_ERROR;
 		}

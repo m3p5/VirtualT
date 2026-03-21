@@ -141,7 +141,7 @@ void Flu_Combo_Box :: selectall(void)
 {
 	const char *v = input.value();
 	if (v)
-		input.position(0, strlen(v));
+    input.insert_position(0, strlen(v));
 	input.redraw();
 }
 

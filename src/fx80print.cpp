@@ -692,7 +692,7 @@ void VTFX80Print::Init(void)
 	m_pPref->get("FX80Print_SkipPerforation", c, 1);
 	m_defSkipPerf = c;
 	m_pPref->get("FX80Print_TopOfForm", m_topOfForm, 0.5);
-	sprintf(m_topOfFormStr, "%.3f", m_topOfForm);
+	snprintf(m_topOfFormStr, sizeof(m_topOfFormStr), "%.3f", m_topOfForm);
 	m_beep = FALSE;
 
 	// Initialize Get preferences for all papers
@@ -837,7 +837,7 @@ int VTFX80Print::GetProperties(void)
 	m_defEnhance = m_pPrintWeightOff->value();
 	m_defSkipPerf = m_pSkipPerfOff->value();
 	m_topOfForm = atof(m_pTopOfForm->value());
-	sprintf(m_topOfFormStr, "%.3f", m_topOfForm);
+	snprintf(m_topOfFormStr, sizeof(m_topOfFormStr), "%.3f", m_topOfForm);
 
 	// Get preferences for all papers
 	count = m_papers.GetSize();
@@ -2684,11 +2684,11 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	// Update line spacing
 	int ls = (int) (m_lineSpacing * 216.0 + 0.5);
 	if ((ls % 36) == 0)
-		sprintf(temp, "%d / 6 inch", ls / 36);
+		snprintf(temp, sizeof(temp), "%d / 6 inch", ls / 36);
 	else if ((ls % 3) == 0)
-		sprintf(temp, "%d / 72 inch", ls / 3);
+		snprintf(temp, sizeof(temp), "%d / 72 inch", ls / 3);
 	else
-		sprintf(temp, "%d / 216 inch", ls);
+		snprintf(temp, sizeof(temp), "%d / 216 inch", ls);
 
 	// Update if needed
 	if ((strcmp(m_sStatLineSpacing, temp) != 0) || forceUpdate)
@@ -2698,7 +2698,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update form length
-	sprintf(temp, "%.2f inch", m_formHeight);
+	snprintf(temp, sizeof(temp), "%.2f inch", m_formHeight);
 	if ((strcmp(m_sStatFormLength, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatFormLength, temp);
@@ -2706,7 +2706,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update Left Margin
-	sprintf(temp, "%.2f inch", m_leftMargin);
+	snprintf(temp, sizeof(temp), "%.2f inch", m_leftMargin);
 	if ((strcmp(m_sStatLeftMargin, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatLeftMargin, temp);
@@ -2714,7 +2714,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update print head position
-	sprintf(temp, "(%d, %d)", m_curX, m_curY);
+	snprintf(temp, sizeof(temp), "(%d, %d)", m_curX, m_curY);
 	if ((strcmp(m_sStatPos, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatPos, temp);
@@ -2725,7 +2725,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	if (!m_skipPerf)
 		strcpy(temp, "Off");
 	else
-		sprintf(temp, "%.2f inches", m_bottomMargin);
+		snprintf(temp, sizeof(temp), "%.2f inches", m_bottomMargin);
 	if ((strcmp(m_sStatPerfSkip, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatPerfSkip, temp);
@@ -2755,7 +2755,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	if (m_escSeen)
 		strcpy(temp, "ESC Seen");
 	else if (m_escCmd)
-		sprintf(temp, "ESC '%c'", m_escCmd);
+		snprintf(temp, sizeof(temp), "ESC '%c'", m_escCmd);
 	else
 		strcpy(temp, "None");
 	if ((strcmp(m_sStatEscMode, temp) != 0) || forceUpdate)
@@ -2765,7 +2765,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	}
 
 	// Update ESC Params
-	sprintf(temp, "%d", m_escParamsRcvd);
+	snprintf(temp, sizeof(temp), "%d", m_escParamsRcvd);
 	if ((strcmp(m_sStatEscParams, temp) != 0) || forceUpdate)
 	{
 		strcpy(m_sStatEscParams, temp);
@@ -2774,7 +2774,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 
 	// Update Graphics Mode
 	if (m_graphicsMode)
-		sprintf(temp, "Active - %d bytes", m_graphicsLength);
+		snprintf(temp, sizeof(temp), "Active - %d bytes", m_graphicsLength);
 	else
 		strcpy(temp, "Inactive");
 	if ((strcmp(m_sStatGraphicsMode, temp) != 0) || forceUpdate)
@@ -2785,7 +2785,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 
 	// Update Graphics Resoluiton
 	if (m_graphicsMode)
-		sprintf(temp, "%.0f DPI", m_graphicsDpi);
+		snprintf(temp, sizeof(temp), "%.0f DPI", m_graphicsDpi);
 	else
 		strcpy(temp, "N/A");
 	if ((strcmp(m_sStatGraphicsRes, temp) != 0) || forceUpdate)
@@ -2796,7 +2796,7 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 
 	// Update Graphics Received
 	if (m_graphicsMode)
-		sprintf(temp, "%d", m_graphicsRcvd);
+		snprintf(temp, sizeof(temp), "%d", m_graphicsRcvd);
 	else
 		strcpy(temp, "N/A");
 	if ((strcmp(m_sStatGraphicsRcvd, temp) != 0) || forceUpdate)
@@ -2808,9 +2808,9 @@ void VTFX80Print::UpdateMonTab(int forceUpdate)
 	// Update the User Definable Char update
 	if (m_escCmd == '&')
 	{
-		sprintf(m_sStatUpdateChar, "%d", m_userUpdateChar),
-		sprintf(m_sStatLastChar, "%d", m_userLastChar),
-		sprintf(m_sStatUpdateBytes, "%d", m_escParamsRcvd - 3 - (m_userLastChar - m_userFirstChar + 1) * 12);
+		snprintf(m_sStatUpdateChar, sizeof(m_sStatUpdateChar), "%d", m_userUpdateChar),
+		snprintf(m_sStatLastChar, sizeof(m_sStatLastChar), "%d", m_userLastChar),
+		snprintf(m_sStatUpdateBytes, sizeof(m_sStatUpdateBytes), "%d", m_escParamsRcvd - 3 - (m_userLastChar - m_userFirstChar + 1) * 12);
 		m_pStatUpdateChar->label(m_sStatUpdateChar);
 		m_pStatLastChar->label(m_sStatLastChar);
 		m_pStatUpdateBytes->label(m_sStatUpdateBytes);

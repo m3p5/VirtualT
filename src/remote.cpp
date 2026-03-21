@@ -144,7 +144,6 @@ void remote_set_speed(int speed);
 int	str_to_i(const char *pStr);
 void remote_switch_model(int model);
 extern int fullspeed;
-extern int fl_wait(double);
 extern void simulate_keydown(int key);
 extern void simulate_keyup(int key);
 extern	Fl_Preferences virtualt_prefs;
@@ -218,7 +217,7 @@ void handle_lcd_timeout()
 	if ((int) (cycles - gLcdUpdateCycle) > gLcdTimeoutCycles)
 	{
 		// New string being written.  Send the old one
-		sprintf(str, "event, lcdwrite, (%d,%d),%s%s", gLcdRow, gLcdColStart,
+		snprintf(str, sizeof(str), "event, lcdwrite, (%d,%d),%s%s", gLcdRow, gLcdColStart,
 			gLcdString.c_str(), gLineTerm.c_str());
 
 		if ((gLcdRow != -1) && (gLcdColStart != -1))
@@ -270,7 +269,7 @@ void handle_lcd_trap()
 		if (gLcdRow != -1)
 		{
 			// New string being written.  Send the old one
-			sprintf(str, "event, lcdwrite, (%d,%d),%s%s", gLcdRow, gLcdColStart,
+			snprintf(str, sizeof(str), "event, lcdwrite, (%d,%d),%s%s", gLcdRow, gLcdColStart,
 				gLcdString.c_str(), gLineTerm.c_str());
 			if (gSocket.socketOpened)
 				gSocket.openSock << str;
@@ -524,9 +523,9 @@ void cb_remote_debug(int reason)
 				if (gSocket.socketOpened)
 				{
 					if (gRadix == 10)
-						sprintf(str, "event, break, PC=%d%s", PC, gLineTerm.c_str());
+						snprintf(str, sizeof(str), "event, break, PC=%d%s", PC, gLineTerm.c_str());
 					else
-						sprintf(str, "event, break, PC=%04X%s", PC, gLineTerm.c_str());
+						snprintf(str, sizeof(str), "event, break, PC=%04X%s", PC, gLineTerm.c_str());
 					gSocket.openSock << str;
 				}
 			}
@@ -543,9 +542,9 @@ void cb_remote_debug(int reason)
 				if (gSocket.socketOpened)
 				{
 					if (gRadix == 10)
-						sprintf(str, "event, break, PC=%d%s", PC, gLineTerm.c_str());
+						snprintf(str, sizeof(str), "event, break, PC=%d%s", PC, gLineTerm.c_str());
 					else
-						sprintf(str, "event, break, PC=%04X%s", PC, gLineTerm.c_str());
+						snprintf(str, sizeof(str), "event, break, PC=%04X%s", PC, gLineTerm.c_str());
 					gSocket.openSock << str;
 				}
 			}
@@ -628,10 +627,10 @@ std::string cmd_status(ServerSocket& sock)
 	get_model_string(modelStr, gModel);
 
 	if (gStopped)
-		sprintf(retStr, "Model=%s, CPU halted%s%s", modelStr, 
+		snprintf(retStr, sizeof(retStr), "Model=%s, CPU halted%s%s", modelStr, 
 			gLineTerm.c_str(), gOk.c_str());
 	else
-		sprintf(retStr, "Model=%s, CPU running%s%s", modelStr,
+		snprintf(retStr, sizeof(retStr), "Model=%s, CPU running%s%s", modelStr,
 			gLineTerm.c_str(), gOk.c_str());
 
 	return retStr;
@@ -741,7 +740,7 @@ std::string cmd_step(ServerSocket& sock, std::string& args)
 		unlock_remote();
 
 		while (gSingleStep)
-			fl_wait(0.001);
+			Fl::wait(0.001);
 	}
 	
 	return gOk;
@@ -825,7 +824,7 @@ std::string cmd_step_over(ServerSocket& sock, std::string& args)
 
 			// Wait for the processor to stop again
 			while (!gStopped)
-				fl_wait(0.001);
+				Fl::wait(0.001);
 
 //			gRemoteBreak[addr] = saveBrk;
 			gStepOverBreak = 0;
@@ -839,7 +838,7 @@ std::string cmd_step_over(ServerSocket& sock, std::string& args)
 
 			// Wait for single step to complete
 			while (gSingleStep)
-				fl_wait(0.001);
+				Fl::wait(0.001);
 		}
 	}
 	
@@ -939,9 +938,9 @@ std::string cmd_read_mem(ServerSocket& sock, std::string& args)
 	for (c = 0; c < len; c++)
 	{
 		if (gRadix == 10)
-			sprintf(str, "%d ", get_memory8(address++));
+			snprintf(str, sizeof(str), "%d ", get_memory8(address++));
 		else
-			sprintf(str, "%02X ", get_memory8(address++));
+			snprintf(str, sizeof(str), "%02X ", get_memory8(address++));
 	
 		ret = ret + str;
 	}
@@ -972,10 +971,10 @@ std::string cmd_read_reg(ServerSocket& sock, std::string& args)
 	if (args == "all")
 	{
 		if (gRadix == 10)
-			sprintf(reg_str, "A=%d F=%d B=%d C=%d D=%d E=%d H=%d L=%d M=%d PC=%d SP=%d%s%s",
+			snprintf(reg_str, sizeof(reg_str), "A=%d F=%d B=%d C=%d D=%d E=%d H=%d L=%d M=%d PC=%d SP=%d%s%s",
 				A, F, B, C, D, E, H, L, get_memory8(HL), PC, SP, gLineTerm.c_str(), gOk.c_str());
 		else
-			sprintf(reg_str, "A=%02X F=%02X B=%02X C=%02X D=%02X E=%02X H=%02X L=%02X M=%02X PC=%04X SP=%04X%s%s",
+			snprintf(reg_str, sizeof(reg_str), "A=%02X F=%02X B=%02X C=%02X D=%02X E=%02X H=%02X L=%02X M=%02X PC=%04X SP=%04X%s%s",
 				A, F, B, C, D, E, H, L, get_memory8(HL), PC, SP, gLineTerm.c_str(), gOk.c_str());
 		unlock_remote();
 		return reg_str;
@@ -1003,72 +1002,72 @@ std::string cmd_read_reg(ServerSocket& sock, std::string& args)
 			// Now figure out which reg it is
 			if (next_arg == "a")
 			{
-				sprintf(reg_str, format_str.c_str(), A);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), A);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "b")
 			{
-				sprintf(reg_str, format_str.c_str(), B);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), B);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "c")
 			{
-				sprintf(reg_str, format_str.c_str(), C);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), C);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "d")
 			{
-				sprintf(reg_str, format_str.c_str(), D);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), D);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "e")
 			{
-				sprintf(reg_str, format_str.c_str(), E);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), E);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "h")
 			{
-				sprintf(reg_str, format_str.c_str(), H);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), H);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "l")
 			{
-				sprintf(reg_str, format_str.c_str(), L);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), L);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "f")
 			{
-				sprintf(reg_str, format_str.c_str(), F);
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), F);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "m")
 			{
-				sprintf(reg_str, format_str.c_str(), get_memory8(HL));
+				snprintf(reg_str, sizeof(reg_str), format_str.c_str(), get_memory8(HL));
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "bc")
 			{
-				sprintf(reg_str, format_str16.c_str(), BC);
+				snprintf(reg_str, sizeof(reg_str), format_str16.c_str(), BC);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "de")
 			{
-				sprintf(reg_str, format_str16.c_str(), DE);
+				snprintf(reg_str, sizeof(reg_str), format_str16.c_str(), DE);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "hl")
 			{
-				sprintf(reg_str, format_str16.c_str(), HL);
+				snprintf(reg_str, sizeof(reg_str), format_str16.c_str(), HL);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "pc")
 			{
-				sprintf(reg_str, format_str16.c_str(), PC);
+				snprintf(reg_str, sizeof(reg_str), format_str16.c_str(), PC);
 				ret = ret + reg_str;
 			}
 			else if (next_arg == "sp")
 			{
-				sprintf(reg_str, format_str16.c_str(), SP);
+				snprintf(reg_str, sizeof(reg_str), format_str16.c_str(), SP);
 				ret = ret + reg_str;
 			}
 
@@ -1256,7 +1255,7 @@ std::string cmd_radix(ServerSocket& sock, std::string& args)
 
 	if (args == "")
 	{
-		sprintf(str, "%d%s%s", gRadix, gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%d%s%s", gRadix, gLineTerm.c_str(), gOk.c_str());
 		return str;
 	}
 		
@@ -1286,9 +1285,9 @@ std::string cmd_in(ServerSocket& sock, std::string& args)
 
 	// Report the value based on radix
 	if (gRadix == 10)
-		sprintf(str, "%d%s%s", inport(port), gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%d%s%s", inport(port), gLineTerm.c_str(), gOk.c_str());
 	else
-		sprintf(str, "%02X%s%s", inport(port), gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%02X%s%s", inport(port), gLineTerm.c_str(), gOk.c_str());
 	return str;
 }
 
@@ -1344,13 +1343,13 @@ std::string cmd_flags(ServerSocket& sock, std::string& args)
 			{
 				// Report the status of this flag
 				cstr[0] = 0;
-				if ((next_arg == "z") || (next_arg == "all")) {sprintf(cstr, "Z=%d ", ZF);str= str +cstr;}
-				if ((next_arg == "s") || (next_arg == "all")) {sprintf(cstr, "S=%d ", SF);str= str +cstr;}
-				if ((next_arg == "c") || (next_arg == "all")) {sprintf(cstr, "C=%d ", CF);str= str +cstr;}
-				if ((next_arg == "p") || (next_arg == "all")) {sprintf(cstr, "P=%d ", PF);str= str +cstr;}
-				if ((next_arg == "ov") || (next_arg == "all")) {sprintf(cstr, "OV=%d ", OV);str= str +cstr;}
-				if ((next_arg == "ac") || (next_arg == "all")) {sprintf(cstr, "AC=%d ", AC);str= str +cstr;}
-				if ((next_arg == "ts") || (next_arg == "all")) {sprintf(cstr, "TS=%d ", TS);str= str +cstr;}
+				if ((next_arg == "z") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "Z=%d ", ZF);str= str +cstr;}
+				if ((next_arg == "s") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "S=%d ", SF);str= str +cstr;}
+				if ((next_arg == "c") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "C=%d ", CF);str= str +cstr;}
+				if ((next_arg == "p") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "P=%d ", PF);str= str +cstr;}
+				if ((next_arg == "ov") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "OV=%d ", OV);str= str +cstr;}
+				if ((next_arg == "ac") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "AC=%d ", AC);str= str +cstr;}
+				if ((next_arg == "ts") || (next_arg == "all")) {snprintf(cstr, sizeof(cstr), "TS=%d ", TS);str= str +cstr;}
 			}
 			else
 			{
@@ -1606,9 +1605,9 @@ std::string cmd_list_break(ServerSocket& sock, std::string& args)
 		if (gRemoteBreak[c] != 0)
 		{
 			if (gRadix == 10)
-				sprintf(str, "%5d: ", c);
+				snprintf(str, sizeof(str), "%5d: ", c);
 			else
-				sprintf(str, "%04X: ", c);
+				snprintf(str, sizeof(str), "%04X: ", c);
 
 			if (gRemoteBreak[c] & BPTYPE_MAIN)
 				strcat(str, "main ");
@@ -1637,10 +1636,10 @@ void key_delay(void)
 {
 	//fl_wait(0.01);
 	while (gSimKey != 0)
-		fl_wait(0.001);
+		Fl::wait(0.001);
 
 	while (gDelayUpdateKeys)
-		fl_wait(0.001);
+		Fl::wait(0.001);
 	//fl_wait(0.01);
 }
 /*
@@ -1956,7 +1955,7 @@ std::string cmd_model(ServerSocket& sock, std::string& args)
 	if (args == "")
 	{
 		get_model_string(model, gModel);
-		sprintf(str, "%s%s%s", model, gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%s%s%s", model, gLineTerm.c_str(), gOk.c_str());
 		return str;
 	}
 		
@@ -1997,7 +1996,7 @@ std::string cmd_model(ServerSocket& sock, std::string& args)
 	else
 		return gParamError;
 
-	fl_wait(0.25);
+	Fl::wait(0.25);
 	return gOk;
 }
 
@@ -2192,7 +2191,7 @@ std::string cmd_lcd_ignore(ServerSocket& sock, std::string& args)
 
 		for (pos = 0; pos < gIgnoreCount; pos++)
 		{
-			sprintf(str, "(%d,%d)-(%d,%d)%s", gIgnoreRects[pos].top_row,
+			snprintf(str, sizeof(str), "(%d,%d)-(%d,%d)%s", gIgnoreRects[pos].top_row,
 				gIgnoreRects[pos].top_col, gIgnoreRects[pos].bottom_row,
 				gIgnoreRects[pos].bottom_col, gLineTerm.c_str());
 			sock << str;
@@ -2244,13 +2243,13 @@ std::string cmd_show_reg(ServerSocket& sock, int value, int size)
 	char		str[20];
 
 	if (gRadix == 10)
-		sprintf(str, "%d%s%s", value, gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%d%s%s", value, gLineTerm.c_str(), gOk.c_str());
 	else
 	{
 		if (size == 2)
-			sprintf(str, "%04X%s%s", value, gLineTerm.c_str(), gOk.c_str());
+			snprintf(str, sizeof(str), "%04X%s%s", value, gLineTerm.c_str(), gOk.c_str());
 		else
-			sprintf(str, "%02X%s%s", value, gLineTerm.c_str(), gOk.c_str());
+			snprintf(str, sizeof(str), "%02X%s%s", value, gLineTerm.c_str(), gOk.c_str());
 	}
 
 	return str;
@@ -2267,10 +2266,10 @@ std::string cmd_rim(ServerSocket& sock, std::string& args)
 	char		str[20];
 
 	if (gRadix == 10)
-		sprintf(str, "%d%s%s", IM, gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%d%s%s", IM, gLineTerm.c_str(), gOk.c_str());
 	else
 	{
-		sprintf(str, "%02X%s%s", IM, gLineTerm.c_str(), gOk.c_str());
+		snprintf(str, sizeof(str), "%02X%s%s", IM, gLineTerm.c_str(), gOk.c_str());
 	}
 
 	return str;
@@ -2427,9 +2426,9 @@ std::string cmd_string(ServerSocket& sock, std::string& args)
 		if ((ch < ' ') || (ch > '~'))
 		{
 			if (gRadix == 10)
-				sprintf(build, "<%d>", ch);
+				snprintf(build, sizeof(build), "<%d>", ch);
 			else
-				sprintf(build,"<%02X>", ch);
+				snprintf(build, sizeof(build),"<%02X>", ch);
 			str = str + build;
 		}
 		else
@@ -2602,7 +2601,7 @@ std::string cmd_trace(ServerSocket& sock, std::string& args)
 			// Must be a filename.  Only 1 filename allowed
 			if (trace_file != "")
 			{
-				sprintf(line, "Error filename \"%s\" already specified%s%s", trace_file.c_str(),
+				snprintf(line, sizeof(line), "Error filename \"%s\" already specified%s%s", trace_file.c_str(),
 					gLineTerm.c_str(), gOk.c_str());
 				return line;
 			}
@@ -2794,7 +2793,7 @@ int telnet_command_ready(ServerSocket& sock, std::string &cmd, char* sockData, i
 					gSocket.sbState = 0;
 					continue;
 				case TELNET_AYT:
-					sprintf(temp, "%c%c", TELNET_IAC, TELNET_GA);
+					snprintf(temp, sizeof(temp), "%c%c", TELNET_IAC, TELNET_GA);
 					sock << temp;
 					gSocket.iacState = ch;
 					continue;
@@ -2809,7 +2808,7 @@ int telnet_command_ready(ServerSocket& sock, std::string &cmd, char* sockData, i
 				{
 					// Process response from our IAC DO TERMINAL_TYPE query
 				case TELNET_TERMTYPE:
-					sprintf(temp, "%c%c%c%c%c%c", TELNET_IAC, TELNET_SB, TELNET_TERMTYPE,
+					snprintf(temp, sizeof(temp), "%c%c%c%c%c%c", TELNET_IAC, TELNET_SB, TELNET_TERMTYPE,
 						TELNET_SEND, TELNET_IAC, TELNET_SE);
 					sock << temp;
 					gSocket.iacState = 0;
@@ -3136,7 +3135,7 @@ void initiate_termtype_negotiation(ServerSocket& sock)
 {
 	char		buf[4];
 
-	sprintf(buf, "%c%c%c", TELNET_IAC ,TELNET_DO, TELNET_TERMTYPE);
+	snprintf(buf, sizeof(buf), "%c%c%c", TELNET_IAC ,TELNET_DO, TELNET_TERMTYPE);
 	sock << buf;
 	gSocket.termMode = REMOTE_TERM_INIT;
 }
@@ -3164,12 +3163,12 @@ void* remote_control(void* arg)
 		if (gSocket.serverSock == NULL)
 		{
 			gSocket.socketError = TRUE;
-			sprintf(errmsg, "Unable to open port %d", gSocket.socketPort);
+			snprintf(errmsg, sizeof(errmsg), "Unable to open port %d", gSocket.socketPort);
 			gSocket.socketErrorMsg = errmsg;
 			return NULL;
 		}
 		gSocket.listenPort = gSocket.socketPort;
-		sprintf(errmsg, "Listening on port %d", gSocket.socketPort);
+		snprintf(errmsg, sizeof(errmsg), "Listening on port %d", gSocket.socketPort);
 		gSocket.socketErrorMsg = errmsg;
 
 		// Now listen on the listener port for connections

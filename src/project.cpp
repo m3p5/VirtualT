@@ -146,12 +146,12 @@ void cb_okNewProject(Fl_Widget* w, void*)
 	}
 
 	// Check if project already exists
-	sprintf(projPath, "%s/%s/%s.prj", pNewProject->getLocation(), projName, projName);
+	snprintf(projPath, sizeof(projPath), "%s/%s/%s.prj", pNewProject->getLocation(), projName, projName);
 	fd = fopen(projPath, "r+");
 	if (fd != NULL)
 	{
 		fclose(fd);
-		sprintf(projPath, "Project %s already exists!", projName);
+		snprintf(projPath, sizeof(projPath), "Project %s already exists!", projName);
 		fl_alert("%s", projPath);
 		return;
 	}
@@ -615,7 +615,7 @@ void VT_ProjectSettings::ProjTypeChanged(void)
 		*pOldExt = '\0';
 	m_pProject->m_OutputName = pNewName + newExt;
 	m_pOutputName->value(m_pProject->m_OutputName);
-	delete pNewName;
+	delete[] pNewName;
 }
 
 void VT_ProjectSettings::show(void)
@@ -1041,7 +1041,7 @@ void VT_Project::SaveProject(void)
 	VT_IdeGroup*	pGroup;
 
 	// Create the path
-	sprintf(fullPath, "%s/%s.prj", (const char *) m_RootPath,
+	snprintf(fullPath, sizeof(fullPath), "%s/%s.prj", (const char *) m_RootPath,
 		(const char *) m_Name);
 
 	// Try to open the file for write mode

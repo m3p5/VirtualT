@@ -245,7 +245,7 @@ int ser_get_port_list(char* port_list, int max, int *count)
 	for (c = 1; c <= 8; c++)
 	{
 		/* Create string name for each port */
-		sprintf(str, "COM%d", c);
+		snprintf(str, sizeof(str), "COM%d", c);
 
 		// Test if port is already opened (it needs to be in the list too)
 		if ((strcmp(str, sp.port_name) == 0) && (sp.open_flag))
@@ -952,7 +952,7 @@ int ser_open_port(void)
 		// Check for error opening port
 		if (sp.hComm == INVALID_HANDLE_VALUE)
 		{
-			sprintf(msg, "Error opening port %s", sp.port_name);
+			snprintf(msg, sizeof(msg), "Error opening port %s", sp.port_name);
 			show_error(msg);
 			return SER_IO_ERROR;
 		}
@@ -992,7 +992,7 @@ int ser_open_port(void)
 		{
 			DWORD err = GetLastError();
 
-			sprintf(msg,"I/O Error on %s", sp.port_name); 
+			snprintf(msg, sizeof(msg),"I/O Error on %s", sp.port_name); 
 			show_error(msg);
 			// Error reading port state
 			return SER_IO_ERROR;

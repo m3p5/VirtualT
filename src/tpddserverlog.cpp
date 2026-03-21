@@ -521,7 +521,7 @@ void VTTpddServerLog::draw(void)
 			{
 				// Print the reference number
 				fl_color(m_colors.ref);
-				sprintf(str, "%4d:", pEntry->m_ref);
+				snprintf(str, sizeof(str), "%4d:", pEntry->m_ref);
 				fl_draw(str, wx + xMargin, wy + line * m_height);
 			}
 
@@ -556,7 +556,7 @@ void VTTpddServerLog::draw(void)
 			for (x = dataIdx; x < pEntry->m_count && c < m_bytesPerLine; x++)
 			{
 				// Format the data  to draw the HEX data
-				sprintf(str, "%02X", (unsigned char) pEntry->m_pData[x]);
+				snprintf(str, sizeof(str), "%02X", (unsigned char) pEntry->m_pData[x]);
 				fl_draw(str, dataX + c++ * m_width*3, wy + line * m_height);
 			}
 
@@ -572,7 +572,7 @@ void VTTpddServerLog::draw(void)
 			{
 				// Format the data  to draw the HEX data
 				if (pEntry->m_pData[x] >= ' ' && pEntry->m_pData[x] <= '~')
-					sprintf(str, "%c", pEntry->m_pData[x]);
+					snprintf(str, sizeof(str), "%c", pEntry->m_pData[x]);
 				else
 					strcpy(str, ".");
 				fl_draw(str, asciiX + c++ * m_width, wy + line * m_height);

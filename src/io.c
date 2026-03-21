@@ -362,7 +362,7 @@ void show_remem_mode(void)
 	{
 		if (inport(REMEM_MODE_PORT) & 0x01)
 		{
-			sprintf(temp, "Map:%d", (inport(REMEM_MODE_PORT) >> 3) & 0x07);
+			snprintf(temp, sizeof(temp), "Map:%d", (inport(REMEM_MODE_PORT) >> 3) & 0x07);
 			display_map_mode(temp);
 		}
 		else

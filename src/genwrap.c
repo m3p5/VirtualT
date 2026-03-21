@@ -279,16 +279,16 @@ char* DLLCALL ultoa(ulong val, char* str, int radix)
 {
 	switch(radix) {
 		case 8:
-			sprintf(str,"%lo",val);
+			snprintf(str, sizeof(str),"%lo",val);
 			break;
 		case 10:
-			sprintf(str,"%lu",val);
+			snprintf(str, sizeof(str),"%lu",val);
 			break;
 		case 16:
-			sprintf(str,"%lx",val);
+			snprintf(str, sizeof(str),"%lx",val);
 			break;
 		default:
-			sprintf(str,"bad radix: %d",radix);
+			snprintf(str, sizeof(str),"bad radix: %d",radix);
 			break;
 	}
 	return(str);
@@ -302,7 +302,7 @@ char* DLLCALL os_version(char *str)
 {
 #if defined(__OS2__) && defined(__BORLANDC__)
 
-	sprintf(str,"OS/2 %u.%u (%u.%u)",_osmajor/10,_osminor/10,_osmajor,_osminor);
+	snprintf(str, sizeof(str),"OS/2 %u.%u (%u.%u)",_osmajor/10,_osminor/10,_osmajor,_osminor);
 
 #elif defined(_WIN32)
 
@@ -325,7 +325,7 @@ char* DLLCALL os_version(char *str)
 			break;
 	}
 
-	sprintf(str,"Windows %sVersion %u.%u (Build %u) %s"
+	snprintf(str, sizeof(str),"Windows %sVersion %u.%u (Build %u) %s"
 			,winflavor
 			,winver.dwMajorVersion, winver.dwMinorVersion
 			,winver.dwBuildNumber,winver.szCSDVersion);
@@ -335,9 +335,9 @@ char* DLLCALL os_version(char *str)
 	struct utsname unixver;
 
 	if(uname(&unixver)<0)
-		sprintf(str,"Unix (uname errno: %d)",errno);
+		snprintf(str, sizeof(str),"Unix (uname errno: %d)",errno);
 	else
-		sprintf(str,"%s %s %s"
+		snprintf(str, sizeof(str),"%s %s %s"
 			,unixver.sysname	/* e.g. "Linux" */
 			,unixver.release	/* e.g. "2.2.14-5.0" */
 			,unixver.machine	/* e.g. "i586" */
@@ -345,7 +345,7 @@ char* DLLCALL os_version(char *str)
 
 #else	/* DOS */
 
-	sprintf(str,"DOS %u.%02u",_osmajor,_osminor);
+	snprintf(str, sizeof(str),"DOS %u.%02u",_osmajor,_osminor);
 
 #endif
 

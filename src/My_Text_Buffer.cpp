@@ -823,7 +823,7 @@ void My_Text_Buffer::add_predelete_callback(My_Text_Predelete_Cb bufPreDeleteCB,
     	newPreDeleteProcs[i + 1] = mPredeleteProcs[i];
     	newCBArgs[i + 1] = mPredeleteCbArgs[i];
     }
-    if (! mNPredeleteProcs != 0) {
+    if (mNPredeleteProcs != 0) {
 		 delete [] mPredeleteProcs;
 		 delete [] mPredeleteCbArgs;
     }
@@ -966,13 +966,13 @@ int My_Text_Buffer::expand_character( char c, int indent, char *outStr, int tabD
   /* Convert control codes to readable character sequences */
   /*... is this safe with international character sets? */
   if ( ( ( unsigned char ) c ) <= 31 ) {
-    sprintf( outStr, "<%s>", ControlCodeTable[ ( unsigned char ) c ] );
+    snprintf(outStr, sizeof(outStr), "<%s>", ControlCodeTable[ ( unsigned char ) c ] );
     return strlen( outStr );
   } else if ( c == 127 ) {
-    sprintf( outStr, "<del>" );
+    snprintf(outStr, sizeof(outStr), "<del>" );
     return 5;
   } else if ( c == nullSubsChar ) {
-    sprintf( outStr, "<nul>" );
+    snprintf(outStr, sizeof(outStr), "<nul>" );
     return 5;
   }
 
@@ -1298,7 +1298,8 @@ int My_Text_Buffer::substitute_null_characters( char *string, int len ) {
 ** routine if no substitution has been done.
 */
 void My_Text_Buffer::unsubstitute_null_characters( char *string ) {
-  register char * c, subsChar = mNullSubsChar;
+  char * c;
+  char subsChar = mNullSubsChar;
 
   if ( subsChar == '\0' )
     return;

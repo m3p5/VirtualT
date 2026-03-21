@@ -90,7 +90,7 @@ void update_port_status(void)
 	else if (get_remote_connect_status())
 		strcpy(sockdlg_ctrl.sStatus, "Connected with client");
 	else if (get_remote_listen_port() != 0)
-		sprintf(sockdlg_ctrl.sStatus, "Listening on port %d", get_remote_listen_port());
+		snprintf(sockdlg_ctrl.sStatus, sizeof(sockdlg_ctrl.sStatus), "Listening on port %d", get_remote_listen_port());
 	else
 		strcpy(sockdlg_ctrl.sStatus, "Sockets not active");
 	sockdlg_ctrl.pStatus->label(sockdlg_ctrl.sStatus);
@@ -243,7 +243,7 @@ void cb_SocketSetup (Fl_Widget* w, void*)
 	b->align(FL_ALIGN_LEFT | FL_ALIGN_INSIDE);
 	sockdlg_ctrl.pPortNumber = new Fl_Input(160, 50, 60, 20, "");
 	sockdlg_ctrl.pPortNumber->align(FL_ALIGN_LEFT);
-	sprintf(sockdlg_ctrl.sPortNumber, "%d", port_num);
+	snprintf(sockdlg_ctrl.sPortNumber, sizeof(sockdlg_ctrl.sPortNumber), "%d", port_num);
 	sockdlg_ctrl.pPortNumber->value(sockdlg_ctrl.sPortNumber);
 
 	// Create checkbox for telnet mode

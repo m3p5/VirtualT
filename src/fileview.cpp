@@ -192,7 +192,7 @@ void display_file(int index)
 			// Print line number
 			lineno = get_memory16(addr1);
 			addr1 += 2;
-			sprintf(substr, linefmt, lineno);
+			snprintf(substr, sizeof(substr), linefmt, lineno);
 			strcat(line, substr);
 
 			// Read remaining data & detokenize
@@ -251,7 +251,7 @@ void display_file(int index)
 //						gFvCtrl.pTb->append(line);
 						strcpy(line, fill);
 					}
-					sprintf(substr, "%s", gKeywordTable[ch & 0x7F]);
+					snprintf(substr, sizeof(substr), "%s", gKeywordTable[ch & 0x7F]);
 					strcat(line, substr);
 				}
 				else if (ch == 0)
@@ -342,7 +342,7 @@ void display_file(int index)
 		while (x < pfile->size)
 		{
 			// Start new line
-			sprintf(line, "%04X: ", pfile->address + x);
+			snprintf(line, sizeof(line), "%04X: ", pfile->address + x);
 
 			// Add up to 16 bytes to line
 			for (c = 0; c < 16; c++)
@@ -352,7 +352,7 @@ void display_file(int index)
 					break;
 
 				// Add next byte to line
-				sprintf(substr, "%02X ", get_memory8(pfile->address + c + x));
+				snprintf(substr, sizeof(substr), "%02X ", get_memory8(pfile->address + c + x));
 				strcat(line, substr);
 			}
 
@@ -419,24 +419,24 @@ void cb_FileSelect(Fl_Widget* w, void*)
 
 	// Format the Directory Entry text
 	if (strcmp(pfile->name, "Unsaved BA") == 0)
-		sprintf(gFvCtrl.sDirEntry, "%04Xh:  %02X %02X ", pfile->dir_address,
+		snprintf(gFvCtrl.sDirEntry, sizeof(gFvCtrl.sDirEntry), "%04Xh:  %02X %02X ", pfile->dir_address,
 			pfile->address & 0xFF,pfile->address >> 8);
 	else
 	{
-		sprintf(gFvCtrl.sDirEntry, "%04Xh:  %02X %02X %02X ", pfile->dir_address,
+		snprintf(gFvCtrl.sDirEntry, sizeof(gFvCtrl.sDirEntry), "%04Xh:  %02X %02X %02X ", pfile->dir_address,
 			pfile->type, pfile->address & 0xFF,pfile->address >> 8);
 
 		// Add the filename bytes
 		for (x = 3; x < 11; x++)
 		{
 			char	substr[5];
-			sprintf(substr, "%02x ", get_memory8(pfile->dir_address+x));
+			snprintf(substr, sizeof(substr), "%02x ", get_memory8(pfile->dir_address+x));
 			strcat(gFvCtrl.sDirEntry, substr);
 		}
 	}
 
 	//  Update file address
-	sprintf(gFvCtrl.sAddress, "Addr: %d (%04Xh)", pfile->address, pfile->address);
+	snprintf(gFvCtrl.sAddress, sizeof(gFvCtrl.sAddress), "Addr: %d (%04Xh)", pfile->address, pfile->address);
 	gFvCtrl.pAddress->label(gFvCtrl.sAddress);
 
 	// Set the text label
@@ -511,7 +511,7 @@ void get_file_list(void)
 		}
 
 		// Add file to Hold Browser
-		sprintf(mt_file, "%-11s %d", gFvCtrl.tFiles[gFvCtrl.tCount].name, 
+		snprintf(mt_file, sizeof(mt_file), "%-11s %d", gFvCtrl.tFiles[gFvCtrl.tCount].name, 
 			gFvCtrl.tFiles[gFvCtrl.tCount].size);
 		gFvCtrl.pFileSelect->add(mt_file);
 
@@ -591,7 +591,7 @@ void get_file_list(void)
 		}
 		
 		// Space pad the filename
-		sprintf(mt_file, "%-11s %d", gFvCtrl.tFiles[gFvCtrl.tCount].name, 
+		snprintf(mt_file, sizeof(mt_file), "%-11s %d", gFvCtrl.tFiles[gFvCtrl.tCount].name, 
 			gFvCtrl.tFiles[gFvCtrl.tCount].size);
 
 		// Add file to Hold Browser and increment for next file

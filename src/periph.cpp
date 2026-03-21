@@ -378,9 +378,9 @@ void ser_com_monitor_cb(int fMonType, unsigned char data)
 			&stop, &parity);
 
 		strcpy(periph_ctrl.com.sPortStatus, openState ? "Open" : "Closed");
-		sprintf(periph_ctrl.com.sBaud, "%d", baud);
-		sprintf(periph_ctrl.com.sWordSize, "%d", size);
-		sprintf(periph_ctrl.com.sStopBits, "%d", stop);
+		snprintf(periph_ctrl.com.sBaud, sizeof(periph_ctrl.com.sBaud), "%d", baud);
+		snprintf(periph_ctrl.com.sWordSize, sizeof(periph_ctrl.com.sWordSize), "%d", size);
+		snprintf(periph_ctrl.com.sStopBits, sizeof(periph_ctrl.com.sStopBits), "%d", stop);
 		periph_ctrl.com.sParity[0] = parity;
 		periph_ctrl.com.sParity[1] = 0;
 		periph_ctrl.com.sComMdm[0] = 0;
@@ -485,7 +485,7 @@ void lpt_port_monitor_cb(int fMonType, unsigned char data)
 	case LPT_MON_PORT_WRITE:
 		if (gLptEnableOn)
 		{
-			sprintf(str, "%02X ", data);
+			snprintf(str, sizeof(str), "%02X ", data);
 			if (++gLptLogLineLen == 16)
 			{
 				strcat(str, "\n");
@@ -532,9 +532,9 @@ void update_com_port_settings()
 		&stop, &parity);
 
 	strcpy(periph_ctrl.com.sPortStatus, openState ? "Open" : "Closed");
-	sprintf(periph_ctrl.com.sBaud, "%d", baud);
-	sprintf(periph_ctrl.com.sWordSize, "%d", size);
-	sprintf(periph_ctrl.com.sStopBits, "%d", stop);
+	snprintf(periph_ctrl.com.sBaud, sizeof(periph_ctrl.com.sBaud), "%d", baud);
+	snprintf(periph_ctrl.com.sWordSize, sizeof(periph_ctrl.com.sWordSize), "%d", size);
+	snprintf(periph_ctrl.com.sStopBits, sizeof(periph_ctrl.com.sStopBits), "%d", stop);
 	periph_ctrl.com.sParity[0] = parity;
 	periph_ctrl.com.sParity[1] = 0;
 	periph_ctrl.com.sComMdm[0] = 0;
@@ -1001,9 +1001,9 @@ void T100_ComMon::AddByte(int rx_tx, char byte, char flags)
 
 		// Draw the text
 		if (gHexOn)
-			sprintf(string, "%02X", b->entries[b->used].byte);
+			snprintf(string, sizeof(string), "%02X", b->entries[b->used].byte);
 		else
-			sprintf(string, "%c", b->entries[b->used].byte);
+			snprintf(string, sizeof(string), "%c", b->entries[b->used].byte);
 		fl_draw(string, xpos, ypos-2);
 	}
 
@@ -1235,9 +1235,9 @@ void T100_ComMon::draw()
 			}
 			// Draw the text
 			if (gHexOn)
-				sprintf(string, "%02X", clb->entries[index].byte);
+				snprintf(string, sizeof(string), "%02X", clb->entries[index].byte);
 			else
-				sprintf(string, "%c", clb->entries[index].byte);
+				snprintf(string, sizeof(string), "%c", clb->entries[index].byte);
 			fl_draw(string, xpos, ypos-2);
 
 			// Save pointer to this cle for next comparison
@@ -1458,9 +1458,9 @@ int T100_ComMon::handle(int event)
 
 				// Draw the text
 				if (gHexOn)
-					sprintf(string, "%02X", prev_cle->byte);
+					snprintf(string, sizeof(string), "%02X", prev_cle->byte);
 				else
-					sprintf(string, "%c", prev_cle->byte);
+					snprintf(string, sizeof(string), "%c", prev_cle->byte);
 				fl_draw(string, xpos, ypos+(int) m_Height-2);
 
 				// Restore line number of current selection
@@ -1474,7 +1474,7 @@ int T100_ComMon::handle(int event)
 				if (shift)
 				{
 					m_pStopTime = cle_sel;
-					sprintf(periph_ctrl.com.sStopChar, "%c (%02xh)", cle_sel->byte, cle_sel->byte);
+					snprintf(periph_ctrl.com.sStopChar, sizeof(periph_ctrl.com.sStopChar), "%c (%02xh)", cle_sel->byte, cle_sel->byte);
 					periph_ctrl.com.pStopChar->label(periph_ctrl.com.sStopChar);
 					m_pStopTime = cle_sel;
 					m_StopTimeLine = line_click + m_FirstLine;
@@ -1484,7 +1484,7 @@ int T100_ComMon::handle(int event)
 				else
 				{
 					m_pStartTime = cle_sel;
-					sprintf(periph_ctrl.com.sStartChar, "%c (%02xh)", cle_sel->byte, cle_sel->byte);
+					snprintf(periph_ctrl.com.sStartChar, sizeof(periph_ctrl.com.sStartChar), "%c (%02xh)", cle_sel->byte, cle_sel->byte);
 					periph_ctrl.com.pStartChar->label(periph_ctrl.com.sStartChar);
 					m_pStartTime = cle_sel;
 					m_StartTimeLine = line_click + m_FirstLine;
@@ -1503,9 +1503,9 @@ int T100_ComMon::handle(int event)
 					// Draw the StartTime text
 					fl_color(FL_BLACK);
 					if (gHexOn)
-						sprintf(string, "%02X", m_pStartTime->byte);
+						snprintf(string, sizeof(string), "%02X", m_pStartTime->byte);
 					else
-						sprintf(string, "%c", m_pStartTime->byte);
+						snprintf(string, sizeof(string), "%c", m_pStartTime->byte);
 					fl_draw(string, xpos, ypos + (int)m_Height-2);
 				}
 				
@@ -1527,9 +1527,9 @@ int T100_ComMon::handle(int event)
 					else
 						fl_color(FL_WHITE);
 					if (gHexOn)
-						sprintf(string, "%02X", m_pStopTime->byte);
+						snprintf(string, sizeof(string), "%02X", m_pStopTime->byte);
 					else
-						sprintf(string, "%c", m_pStopTime->byte);
+						snprintf(string, sizeof(string), "%c", m_pStopTime->byte);
 					fl_draw(string, xpos, ypos + (int)m_Height-2);
 				}
 			}	
@@ -1554,9 +1554,9 @@ int T100_ComMon::handle(int event)
 			{
 				delta = (m_pStopTime->time - m_pStartTime->time) * 1000.0;
 				if ((delta > 1000.0) || (delta < -1000.0))
-					sprintf(periph_ctrl.com.sDeltaTime, "Time = %.3f s", delta/1000.0);
+					snprintf(periph_ctrl.com.sDeltaTime, sizeof(periph_ctrl.com.sDeltaTime), "Time = %.3f s", delta/1000.0);
 				else
-					sprintf(periph_ctrl.com.sDeltaTime, "Time = %.1f ms", delta);
+					snprintf(periph_ctrl.com.sDeltaTime, sizeof(periph_ctrl.com.sDeltaTime), "Time = %.1f ms", delta);
 			}
 			else
 				strcpy(periph_ctrl.com.sDeltaTime, "");
@@ -1709,12 +1709,12 @@ void T100_ComMon::SaveLog(void)
 				else
 					rxtx = CLE_RX;
 
-				sprintf(outLine, "%04d %s ", line++, rxtx == CLE_TX ? "TX" : "RX");
+				snprintf(outLine, sizeof(outLine), "%04d %s ", line++, rxtx == CLE_TX ? "TX" : "RX");
 				cnt = 0;			// No bytes on this line yet
 			}
 
 			// Draw the text
-			sprintf(string, "%02X ", cle->byte);
+			snprintf(string, sizeof(string), "%02X ", cle->byte);
 			strcat(outLine, string);
 			bytes[cnt++] = cle->byte;
 
