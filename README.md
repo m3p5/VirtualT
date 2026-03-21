@@ -14,7 +14,7 @@ Built with **C++ 17** and **FLTK 1.4+**.
 
 ## Background
 
-I ran into several build warnings and errors when I tried to build Version 1.7 on macOS, so I cloned the [McNeight/VirtualT](https://github.com/McNeight/VirtualT/tree/master) respository and went to work fixing these issues. Version 1.8 builds with no erros for me, but there is more testing to be performed.
+I ran into several build warnings and errors when I tried to build Version 1.7 of [McNeight/VirtualT](https://github.com/McNeight/VirtualT/tree/master) on macOS 26.3, so I cloned the respository and went to work fixing these issues. Version 1.8 builds with no erros for me, but I still have more regression testing to perform. See [ChangeLog](./ChangeLog) for a summary of my fixes.
 
 ---
 
@@ -28,7 +28,7 @@ I ran into several build warnings and errors when I tried to build Version 1.7 o
 
 ---
 
-## Project Structure
+## Project Structure (not yet fully populated)
 
 ```text
 VirtualT/
@@ -50,7 +50,7 @@ VirtualT/
 
 ---
 
-## Building
+## Building (not yet populated)
 
 ### macOS
 
