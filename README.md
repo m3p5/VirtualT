@@ -2,6 +2,8 @@
 
 A cross-platform TRS-80 Model 100/102/200 emulator that runs on Windows, Linux, and Macintosh.
 
+![Model 100](./doc/model_100.jpg)
+
 Built with **C++ 17** and **FLTK 1.4+**.
 
 ---
@@ -19,6 +21,12 @@ I ran into several build warnings and errors when I tried to build Version 1.7 o
 ---
 
 ## Screenshots
+
+---
+
+## Help Documentation
+
+See [VirtualT Help](doc/help.html).
 
 ---
 
