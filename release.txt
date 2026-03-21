@@ -1,7 +1,8 @@
+NOTE: This file will be deprecated and replaced with ChangeLog in a future version.
+
 ====================
 VirtualT Release.txt
 ====================
-
 
 This file lists the changes and additions for each of the versions of VirtualT since v0.3
 
@@ -109,14 +110,14 @@ v1.6 April 24, 2014
 
 1.  Fixed issue with remote interface simulated keystokes where the keys wouldn't
     always be regconized.  There was a race condition between the remote thread
-	and the simulation thread.
+    and the simulation thread.
 
 2.  Completed the 8085 relocating linker!!  This was the primary reason for this
     release in fact.  Many, many changes to get to this point.
 
 3.  Modified the IDE with new tabs for selecting the file to edit.  The old tabs used
     the standard FLTK tab control and were really ugly, plus had an issue with tab
-	width calculations with regard to mouse presses to select the tab.
+    width calculations with regard to mouse presses to select the tab.
 
 4.  Updated GNUmakefile to auto-generate dependencies and use wildcard search for
     selecting source files vs. specifying everything manually.
@@ -490,4 +491,3 @@ v0.4  August 3 2005
     fully functional except the "Load" and "Save" options under the file menu.
 
 6.  The "Tools,  Disassembler" has been updated to disassemble the M102, T200, and PC8201 ROMS.
-
