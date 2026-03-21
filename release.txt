@@ -1,52 +1,10 @@
-NOTE: This file will be deprecated and replaced with ChangeLog in a future version.
+NOTE: This file only contains changes up to v1.7. See ChangeLog for the list of changes since v1.7.
 
 ====================
 VirtualT Release.txt
 ====================
 
 This file lists the changes and additions for each of the versions of VirtualT since v0.3
-
-=====================
-v1.8 2026-03-21
-=====================
-
-1.  Fixed macOS C++ compile failure in preference handling by using C++-safe
-    conversion (`std::atoi`) and proper header usage in `pref_form.cpp`.
-
-2.  Fixed arm64 link failure in remote processing by replacing legacy
-    `fl_wait(double)` usage with FLTK API `Fl::wait(...)` calls.
-
-3.  Updated build/link flags for Darwin to remove stale/legacy library paths
-    (including old X11 and Homebrew libpng path handling) and removed duplicate
-    pthread linkage noise in makefiles.
-
-4.  Performed project-wide `sprintf` to `snprintf` migration across modified
-    source files to address modern macOS deprecation warnings.
-
-5.  Updated FLTK API usage in editor/UI code to newer calls where needed
-    (including replacement of deprecated cursor-position methods).
-
-6.  Corrected memory-management and safety issues found during warning cleanup,
-    including mismatched `new[]`/`delete` handling and related warning fixes.
-
-7.  Resolved additional compiler warnings across C/C++ modules, including
-    assignment-in-condition cleanup, prototype modernization, empty-body cleanup,
-    logical precedence fixes, and unused/extra argument fixes.
-
-8.  Added Apple-clang scoped suppression around deprecated `sem_init` usage in
-    `m100emu.c` to keep build output clean while preserving behavior.
-
-9.  Applied related formatting-safe warning cleanups in touched modules such as
-    assembler/disassembler, IDE/editor windows, memory tools, socket dialogs,
-    printer/paper views, and peripheral/remote support code.
-
-10. Verified successful full build after the above changes (`virtualt` and
-    `vt_client` binaries produced).
-
-11. Current uncommitted workspace also contains generated build/runtime artifacts
-    from local builds and execution, including `.dep/`, `obj/`, model
-    directories (`M10`, `M100`, `M102`, `T200`, `PC8201`, `PC8300`, `KC85`),
-    plus built binaries and `.DS_Store`.
 
 =====================
 v1.7 4/7/2014
