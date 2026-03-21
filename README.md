@@ -22,6 +22,8 @@ I ran into several build warnings and errors when I tried to build Version 1.7 o
 
 ## Screenshots
 
+![Model 100 menu](./doc/menu.jpg)
+
 ---
 
 ## Help Documentation
