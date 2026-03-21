@@ -1,4 +1,4 @@
-NOTE: This file only contains changes up to v1.7. See ChangeLog for the list of changes since v1.7.
+NOTE: This file only summarizes changes up to v1.7. See ChangeLog for the list of changes since v1.7.
 
 ====================
 VirtualT Release.txt
