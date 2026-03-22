@@ -22,7 +22,9 @@ I ran into several build warnings and errors when I tried to build Version 1.7 o
 
 ## Screenshots
 
+Model 100
 ![Model 100](./screenshots/M100.png)
+Tandy 200
 ![Tandy 200](./screenshots/T200.png)
 
 ---
