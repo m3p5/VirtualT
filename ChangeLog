@@ -1,5 +1,13 @@
 # ChangeLog
 
+Version 1.9 (2026-03-21)
+
+- Fixed crash when switching models (e.g., M100 to T200) caused by improper
+    deletion of FLTK-managed menu widgets in T100_Disp destructor. The menu
+    button widgets (m_LeftClick, m_LeftClickQuad, m_CopyCut) are managed by FLTK
+    and should not be explicitly deleted. Changed destructor to only null out
+    pointers instead of calling delete, allowing FLTK to handle cleanup properly.
+
 Version 1.8 (2026-03-21)
 
 - Fixed macOS C++ compile failure in preference handling by using C++-safe

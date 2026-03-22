@@ -1602,6 +1602,11 @@ T100_Disp::T100_Disp(int x, int y, int w, int h) :
 {
 	int driver, c;
 
+	// Initialize pointers to NULL to prevent crashes if destructor is called
+	m_CopyCut = NULL;
+	m_LeftClick = NULL;
+	m_LeftClickQuad = NULL;
+
 	m_FrameColor = gFrameColor;
 	m_DetailColor = gDetailColor;
 	m_BackgroundColor = gBackgroundColor;
@@ -1662,9 +1667,12 @@ T100_Disp::T100_Disp(int x, int y, int w, int h) :
 
 T100_Disp::~T100_Disp()
 {
-	delete m_LeftClick;
-	delete m_LeftClickQuad;
-	delete m_CopyCut;
+	// Don't delete these FLTK menu widgets - they are managed by FLTK
+	// and deleting them here can cause segfaults when switching models
+	// Just clear the pointers
+	m_LeftClick = NULL;
+	m_LeftClickQuad = NULL;
+	m_CopyCut = NULL;
 }
 
 const T100_Disp& T100_Disp::operator=(const T100_Disp& srcDisp)
