@@ -54,7 +54,7 @@ VirtualT/
 
 | Dependency   | Version | Notes                         |
 |--------------|---------|-------------------------------|
-| CMake        | ≥ 3.16  | Build system                  |
+| Make         | ≥ 3.8   | Build system                  |
 | FLTK         | ≥ 1.4   | GUI framework                 |
 | C++ compiler | C++17   | GCC 9+, Clang 10+, MSVC 2019+ |
 
