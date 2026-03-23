@@ -61,10 +61,5 @@ Version 1.8 (2026-03-21)
 - Verified successful full build after the above changes (`virtualt` and
     `vt_client` binaries produced).
 
-- Current uncommitted workspace also contains generated build/runtime artifacts
-    from local builds and execution, including `.dep/`, `obj/`, model
-    directories (`M10`, `M100`, `M102`, `T200`, `PC8201`, `PC8300`, `KC85`),
-    plus built binaries and `.DS_Store`.
-
 
 For versions prior to Version 1.8, see [release.txt](./release.txt).
