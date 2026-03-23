@@ -1,5 +1,22 @@
 # ChangeLog
 
+
+Version 2.0 (2026-03-22)
+
+- Used #if LCD_DELAY_SIMULATION to block comment out the too agressive LCD
+    display controller delay in io.c.
+
+- Improved macOS keyboard handling for M100/M102/T200-family input by
+    normalizing shifted punctuation from MacBook keyboards to the base key
+    events expected by the emulator.
+
+- Added normalization support for the following shifted punctuation keys on
+    macOS: `:+"<>?_{}|~`.
+
+- Added smart-quote normalization for macOS text input so Unicode quote
+    variants map to the emulated quote key path instead of being dropped.
+
+
 Version 1.9 (2026-03-21)
 
 - Fixed crash when switching models (e.g., M100 to T200) caused by improper
@@ -7,6 +24,7 @@ Version 1.9 (2026-03-21)
     button widgets (m_LeftClick, m_LeftClickQuad, m_CopyCut) are managed by FLTK
     and should not be explicitly deleted. Changed destructor to only null out
     pointers instead of calling delete, allowing FLTK to handle cleanup properly.
+
 
 Version 1.8 (2026-03-21)
 

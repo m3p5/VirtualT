@@ -2722,6 +2722,70 @@ int T100_Disp::sim_event_key(void)
 	return m_simEventKey;
 }
 
+#ifdef __APPLE__
+
+static unsigned int vt_utf8_first_codepoint(const char* text, int len)
+{
+	const unsigned char* s;
+
+	if (text == NULL || len <= 0)
+		return 0;
+
+	s = (const unsigned char*) text;
+	if ((s[0] & 0x80) == 0)
+		return s[0];
+
+	if ((len >= 2) && ((s[0] & 0xE0) == 0xC0) && ((s[1] & 0xC0) == 0x80))
+		return ((unsigned int)(s[0] & 0x1F) << 6) |
+			(unsigned int)(s[1] & 0x3F);
+
+	if ((len >= 3) && ((s[0] & 0xF0) == 0xE0) &&
+		((s[1] & 0xC0) == 0x80) && ((s[2] & 0xC0) == 0x80))
+		return ((unsigned int)(s[0] & 0x0F) << 12) |
+			((unsigned int)(s[1] & 0x3F) << 6) |
+			(unsigned int)(s[2] & 0x3F);
+
+	if ((len >= 4) && ((s[0] & 0xF8) == 0xF0) &&
+		((s[1] & 0xC0) == 0x80) && ((s[2] & 0xC0) == 0x80) &&
+		((s[3] & 0xC0) == 0x80))
+		return ((unsigned int)(s[0] & 0x07) << 18) |
+			((unsigned int)(s[1] & 0x3F) << 12) |
+			((unsigned int)(s[2] & 0x3F) << 6) |
+			(unsigned int)(s[3] & 0x3F);
+
+	return 0;
+}
+
+static unsigned int vt_normalize_mac_punctuation_key(unsigned int key)
+{
+	unsigned int cp;
+
+	// Normalize shifted punctuation back to the physical base key.
+	switch (key)
+	{
+	case ':': return ';';
+	case '+': return '=';
+	case '<': return ',';
+	case '>': return '.';
+	case '?': return '/';
+	case '_': return '-';
+	case '{': return '[';
+	case '}': return ']';
+	case '|': return '\\';
+	case '~': return '`';
+	case '"': return '\'';
+	default:
+		break;
+	}
+
+	cp = vt_utf8_first_codepoint(Fl::event_text(), Fl::event_length());
+	if ((cp == 0x201C) || (cp == 0x201D) || (cp == 0x201E) || (cp == 0x2033))
+		return '\'';
+
+	return key;
+}
+#endif
+
 /*
 ==========================================================================
 Handle simulatged wheel keys (Function buttons, Enter, etc.)
@@ -3629,6 +3693,9 @@ int T100_Disp::handle(int event)
 		// Get the Key that was pressed
 		//key = Fl::event_key();
 		key = event_key();
+#ifdef __APPLE__
+		key = vt_normalize_mac_punctuation_key(key);
+#endif
 		switch (key)
 		{
 		case FL_Escape:
@@ -4066,6 +4133,9 @@ int T100_Disp::handle(int event)
 
 		// Get the Key that was pressed
 		key = event_key();
+#ifdef __APPLE__
+		key = vt_normalize_mac_punctuation_key(key);
+#endif
 		switch (key)
 		{
 		case FL_Escape:

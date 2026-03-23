@@ -1264,6 +1264,7 @@ int inport(uchar port)
             {
                 if (fullspeed == 0)
 				{
+#if LCD_DELAY_SIMULATION
 					/* Loop through all LCD driver modules */
 					for (c = 0; c < 10; c++)
 					{
@@ -1272,6 +1273,7 @@ int inport(uchar port)
 							if (lcdTime[c]+.000014 > hirestimer())
 			                    return (0x80);
 					}
+#endif
 					return 64;
 				}
                 else

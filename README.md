@@ -37,7 +37,7 @@ See [VirtualT Help](doc/help.html).
 
 ## Current Release
 
-- Version 1.9
+- Version 2.0
 
 ---
 
