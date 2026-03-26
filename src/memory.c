@@ -25,17 +25,17 @@ memory.c
 #include "setup.h"
 #include "filewrap.h"
 
-uchar			*gMemory[64];		/* CPU Memory space */
+uchar			*gMemory[64] = {0};		/* CPU Memory space */
 int				gRamBottom = 0x8000;/* Defines the amount of RAM installed */
-uchar			gBaseMemory[65536];	/* System Memory */
-uchar			gSysROM[4*32768];	/* System ROM */
-uchar			gOptROM[32768];		/* Option ROM */
-uchar			gMsplanROM[32768];	/* MSPLAN ROM T200 Only */
+uchar			gBaseMemory[65536] = {0};	/* System Memory */
+uchar			gSysROM[4*32768] = {0};	/* System ROM */
+uchar			gOptROM[32768] = {0};		/* Option ROM */
+uchar			gMsplanROM[32768] = {0};	/* MSPLAN ROM T200 Only */
 //extern char		path[255];
 extern char		file[255];
 
 int				gOptRomRW = 0;		/* Flag to make OptROM R/W */
-unsigned char	rambanks[4*32768];	/* Model T200 & NEC RAM banks */
+unsigned char	rambanks[4*32768] = {0};	/* Model T200 & NEC RAM banks */
 uchar			gRamBank = 0;		/* Currently enabled bank */
 int				gRomBank = 0;		/* Current ROM Bank selection */
 static int		gRom0Bank = 0;		/* Current ROM #0 Bank for PC-8300 */
@@ -80,7 +80,7 @@ unsigned char	gRex3Data = 0;		/* REX3 data to write for commands 2,5 and 6 */
 unsigned char	gRex3Cmd = 0;		/* REX3 command saved for state 6 */
 amd_flash_t		gRexFlash = { FLASH_STATE_RO, 0, FALSE, 0 };
 unsigned char	gRexKeyTable[6] = { 184, 242, 52, 176, 49, 191 };
-int				gIndex[65536];
+int				gIndex[65536] = {0};
 
 extern RomDescription_t		gM100_Desc;
 extern RomDescription_t		gM200_Desc;

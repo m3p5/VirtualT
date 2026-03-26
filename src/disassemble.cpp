@@ -239,6 +239,15 @@ static void cb_find_next(Fl_Widget* w, void* pOpaque);
 static void cb_open_file(Fl_Widget* w, void* pOpaque);
 static void cb_save_file(Fl_Widget* w, void* pOpaque);
 
+#ifdef __APPLE__
+static int gOpenDisPending = 0;
+static void cb_open_disassembler_deferred(void*)
+{
+	gOpenDisPending = 0;
+	disassembler_cb(NULL, NULL);
+}
+#endif
+
 // Menu items for the disassembler
 Fl_Menu_Item gDis_menuitems[] = {
   { "&File",              0, 0, 0, FL_SUBMENU },
@@ -254,6 +263,7 @@ Fl_Menu_Item gDis_menuitems[] = {
 	{ "Find Next",        FL_F + 3,        cb_find_next, 0, 0 },
 	{ 0 },
 
+#ifndef __APPLE__
   { "&Tools",             0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -261,6 +271,7 @@ Fl_Menu_Item gDis_menuitems[] = {
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
 
   { 0 }
 };
@@ -274,14 +285,17 @@ static void close_cb(Fl_Widget* w, void*)
 {
 	if (gpDis != NULL)
 	{
+		VTDis* pDis = gpDis;
+
 		// Save the window preferences
-		gpDis->SavePrefs();
+		pDis->SavePrefs();
 
 		// Collapse the window
-		collapse_window(gpDis);
+		collapse_window(pDis);
+		pDis->hide();
 
-		// Now delete the window
-		delete gpDis;
+		// Use FLTK's deferred deletion queue to avoid teardown during event dispatch.
+		Fl::delete_widget(pDis);
 		gpDis = 0;
 	}
 }
@@ -688,10 +702,22 @@ void disassembler_cb(Fl_Widget* w, void*)
 	const int	wx = 50;
 	const int	wy = 50;
 
+#ifdef __APPLE__
+	if ((w != NULL) && !gOpenDisPending)
+	{
+		gOpenDisPending = 1;
+		Fl::add_timeout(0.0, cb_open_disassembler_deferred);
+		return;
+	}
+#endif
+
 	if (gpDis == NULL)
 	{
 		// Create a Disassembler
 		gpDis = new VTDis(wx, wy , "Disassembler");
+		#ifdef __APPLE__
+		gpDis->set_non_modal();
+		#endif
 		gpDis->callback(close_cb);
 
 		// Load user preferences
@@ -777,6 +803,9 @@ VTDis::VTDis(int x, int y, const char *title) :
 	m_EndAddress = ROMSIZE-1;
 	m_BaseAddress = 0;
 	m_WantComments = 0;
+	m_pTd = NULL;
+	m_pTextViewer = NULL;
+	m_pDisType = NULL;
 	m_pFindDlg = NULL;
 }
 
@@ -792,6 +821,9 @@ VTDis::VTDis() :
 	m_EndAddress = ROMSIZE-1;
 	m_BaseAddress = 0;
 	m_WantComments = 0;
+	m_pTd = NULL;
+	m_pTextViewer = NULL;
+	m_pDisType = NULL;
 	m_pFindDlg = NULL;
 }
 
@@ -812,13 +844,9 @@ Disassembler Class Definition - empty constructor
 */
 VTDis::~VTDis()
 {
-	delete m_pTd;
-
-    if (m_pTextViewer != NULL)
-    {
-        delete m_pTextViewer->buffer();
-        delete m_pTextViewer;
-    }
+	m_pTd = NULL;
+	m_pTextViewer = NULL;
+	m_pDisType = NULL;
 
 	// Delete the find dialog
 	if (m_pFindDlg != NULL)

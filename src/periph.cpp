@@ -61,6 +61,15 @@
 
 void cb_Ide(Fl_Widget* w, void*) ;
 
+#ifdef __APPLE__
+static int gOpenPeriphPending = 0;
+static void cb_open_peripheral_devices_deferred(void*)
+{
+	gOpenPeriphPending = 0;
+	cb_PeripheralDevices(NULL, NULL);
+}
+#endif
+
 typedef struct periph_ctrl_struct	
 {
 	Fl_Menu_Bar*			pMenu;
@@ -143,6 +152,7 @@ typedef struct periph_ctrl_struct
 
 // Menu items for the disassembler
 Fl_Menu_Item gPeriph_menuitems[] = {
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -151,6 +161,7 @@ Fl_Menu_Item gPeriph_menuitems[] = {
 //	{ "Simulation Log Viewer", 0, 0 },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
 
   { 0 }
 };
@@ -174,8 +185,14 @@ Callback routine for the Peripherial Devices window
 void cb_peripheralwin (Fl_Widget* w, void*)
 {
 	int		count, c;
+	Fl_Window* pWin;
 
-	gpdw->hide();
+	if (gpdw == NULL)
+		return;
+
+	pWin = gpdw;
+
+	pWin->hide();
 	ser_set_monitor_callback(NULL);
 	lpt_set_monitor_callback(NULL);
 	gComEnableOn = 0;
@@ -191,8 +208,10 @@ void cb_peripheralwin (Fl_Widget* w, void*)
 	}
 	periph_ctrl.lptDevices.RemoveAll();
 
-	delete gpdw;
 	gpdw = NULL;
+
+	// Use FLTK's deferred deletion queue to avoid teardown during event dispatch.
+	Fl::delete_widget(pWin);
 }
 
 /*
@@ -559,11 +578,23 @@ void cb_PeripheralDevices (Fl_Widget* w, void*)
 	Fl_Box*		o;
 	int			count, c;
 
+#ifdef __APPLE__
+	if ((w != NULL) && !gOpenPeriphPending)
+	{
+		gOpenPeriphPending = 1;
+		Fl::add_timeout(0.0, cb_open_peripheral_devices_deferred);
+		return;
+	}
+#endif
+
 	if (gpdw != NULL)
 		return;
 
 	// Create Peripheral Setup window
 	gpdw = new Fl_Window(550, 400, "Peripheral Devices");
+	#ifdef __APPLE__
+	gpdw->set_non_modal();
+	#endif
 	gpdw->callback(cb_peripheralwin);
 
 	// Create Peripheral Tabs

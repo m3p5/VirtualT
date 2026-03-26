@@ -31,7 +31,7 @@
 #ifndef _VIRTUALT_H_
 #define _VIRTUALT_H_
 
-#define VERSION	"2.0"
+#define VERSION	"2.1"
 
 enum {
 	 MODEL_M100

@@ -30,6 +30,9 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Bar.H>
+#ifdef __APPLE__
+#include <FL/Fl_Sys_Menu_Bar.H>
+#endif
 #include <FL/Fl_Help_Dialog.H>
 #include <FL/Fl_Pixmap.H>
 
@@ -94,6 +97,64 @@ void	memory_monitor_cb(void);
 void 			cb_Ide(Fl_Widget* w, void*);
 void 			cb_TpddServerLog(Fl_Widget* w, void*);
 
+class VT_Menu_Bar : public Fl_Menu_Bar
+{
+public:
+	VT_Menu_Bar(int x, int y, int w, int h, const char* l = 0)
+		: Fl_Menu_Bar(x, y, w, h, l)
+	{
+	}
+
+	int handle(int event)
+	{
+		const Fl_Menu_Item* v;
+
+		if (menu() && menu()->text) switch (event)
+		{
+			case FL_ENTER:
+			case FL_LEAVE:
+				return 1;
+			case FL_PUSH:
+				v = 0;
+			goto open_menu;
+			case FL_SHORTCUT:
+				if (visible_r())
+				{
+					v = menu()->find_shortcut(0, true);
+					if (v && v->submenu())
+						goto open_menu;
+				}
+				return test_shortcut() != 0;
+		}
+
+		return Fl_Menu_Bar::handle(event);
+
+	open_menu:
+	#ifdef FL_BEFORE_MENU
+		handle(FL_BEFORE_MENU);
+	#endif
+		menu_end();
+		v = menu()->pulldown(x(), y(), w(), h(), v, this, 0, 1);
+		picked(v);
+		return 1;
+	}
+};
+
+static int main_menu_height(void)
+{
+#ifdef __APPLE__
+	return 0;
+#else
+	return MENU_HEIGHT;
+#endif
+}
+
+static int main_menu_bar_height(void)
+{
+	int menu_height = main_menu_height();
+	return menu_height > 1 ? menu_height - 2 : 0;
+}
+
 Fl_Window		*MainWin = NULL;
 T100_Disp		*gpDisp;
 T100_Disp		*gpDebugMonitor;
@@ -119,6 +180,9 @@ int				gBackgroundColor = FL_GRAY;
 int				gPixelColor = FL_BLACK;
 int				gLabelColor = FL_WHITE;
 int				gConsoleDebug = FALSE;
+static int		gMainWinFullscreenActive = FALSE;
+static int		gMainWinRestoreX = -1;
+static int		gMainWinRestoreY = -1;
 
 Fl_Double_Window*	gDisplayColors;
 Fl_Button*			gLcdBkButton;
@@ -414,6 +478,8 @@ extern "C" void resize_window()
 #ifdef WIN32
 	int		hiddenTaskBarAdjust = 0;
 #endif
+	const int menu_height = main_menu_height();
+	const int menu_bar_height = main_menu_bar_height();
 
 	if (gpDisp == NULL)
 		return;
@@ -432,50 +498,81 @@ extern "C" void resize_window()
 
 #ifdef ZIPIT_Z2
 	MainWin->fullscreen();
+#ifndef __APPLE__
+	gMainWinFullscreenActive = TRUE;
+#endif
 #else
 	if (Fullscreen)
 	{
-		MainWin->fullscreen();
+		int oldw = MainWin->w();
+		int oldh = MainWin->h();
+		if (!gMainWinFullscreenActive)
+		{
+			MainWin->fullscreen();
+			gMainWinFullscreenActive = TRUE;
+		}
 #ifdef WIN32
 		int sx, sy, sw, sh;
 		Fl::screen_xywh(sx, sy, sw, sh);
 		if ((sh == 480) || (sh == 800) || (sh == 600) || (sh == 768) || (sh == 1024) || (sh == 1280))
 			hiddenTaskBarAdjust = 4;
 		MainWin->resize(sx, sy, sw, sh - hiddenTaskBarAdjust);
+#elif defined(__APPLE__)
+		// Some FLTK/macOS combinations ignore fullscreen(); force screen size as fallback.
+		if ((MainWin->w() == oldw) && (MainWin->h() == oldh))
+		{
+			int sx, sy, sw, sh;
+			Fl::screen_xywh(sx, sy, sw, sh);
+			MainWin->resize(sx, sy, sw, sh);
+		}
 #endif	/* WIN32 */
 		MultFact = min(MainWin->w()/240, MainWin->h()/128);
 		gpDisp->MultFact = MultFact;
 	}
 	else
 	{
-		if (MainWin->y() <= 0)
-			MainWin->fullscreen_off(32, 32, 240*gpDisp->MultFact +
-				90*gpDisp->DisplayMode+2, gpDisp->DispHeight*gpDisp->MultFact + 
-				50*gpDisp->DisplayMode + MENU_HEIGHT + 22);
-		else
+		if (gMainWinFullscreenActive)
+		{
+		#ifdef __APPLE__
 			MainWin->fullscreen_off(MainWin->x(), MainWin->y(), 240*gpDisp->MultFact +
 				90*gpDisp->DisplayMode+2, gpDisp->DispHeight*gpDisp->MultFact + 
-				50*gpDisp->DisplayMode + MENU_HEIGHT + 22);
+				50*gpDisp->DisplayMode + menu_height + 22);
+		#else
+			if (MainWin->y() <= 0)
+				MainWin->fullscreen_off(32, 32, 240*gpDisp->MultFact +
+					90*gpDisp->DisplayMode+2, gpDisp->DispHeight*gpDisp->MultFact + 
+					50*gpDisp->DisplayMode + menu_height + 22);
+			else
+				MainWin->fullscreen_off(MainWin->x(), MainWin->y(), 240*gpDisp->MultFact +
+					90*gpDisp->DisplayMode+2, gpDisp->DispHeight*gpDisp->MultFact + 
+					50*gpDisp->DisplayMode + menu_height + 22);
+		#endif
+			gMainWinFullscreenActive = FALSE;
+		}
 	}
 
 	/* Ensure the window isn't off the top of the screen */
+	#ifndef __APPLE__
 	if (MainWin->y() <= 0)
 	{
 		if (!Fullscreen)
 			MainWin->resize(32, 32, 240*gpDisp->MultFact +
 				90*gpDisp->DisplayMode+2,gpDisp->DispHeight*gpDisp->MultFact + 
-				50*gpDisp->DisplayMode + MENU_HEIGHT + 22);
+				50*gpDisp->DisplayMode + menu_height + 22);
 	}
 	else
+	#endif
 	{
-		MainWin->resize(MainWin->x(), MainWin->y(), 240*gpDisp->MultFact +
-			90*gpDisp->DisplayMode+2,gpDisp->DispHeight*gpDisp->MultFact + 
-			50*gpDisp->DisplayMode + MENU_HEIGHT + 22);
+		// Keep fullscreen geometry; resizing here would revert to windowed size.
+		if (!Fullscreen)
+			MainWin->resize(MainWin->x(), MainWin->y(), 240*gpDisp->MultFact +
+				90*gpDisp->DisplayMode+2,gpDisp->DispHeight*gpDisp->MultFact + 
+				50*gpDisp->DisplayMode + menu_height + 22);
 	}
 #endif	/* ZIPIT_Z2 */
 
-	Menu->resize(0, 0, MainWin->w(), MENU_HEIGHT-2);
-	gpDisp->resize(0, MENU_HEIGHT, MainWin->w(), MainWin->h() - MENU_HEIGHT - 20);
+	Menu->resize(0, 0, MainWin->w(), menu_bar_height);
+	gpDisp->resize(0, menu_height, MainWin->w(), MainWin->h() - menu_height - 20);
 	int ctrlY = MainWin->h() - 20;
 
 #ifdef ZIPIT_Z2
@@ -522,6 +619,8 @@ Calculate the xoffset, yoffset, border locations, etc.
 */
 void T100_Disp::CalcScreenCoords(void)
 {
+	const int menu_height = main_menu_height();
+
 	// Calculatet the pixel rectangle size
 	::gRectsize = MultFact - (1 - SolidChars);
 	if (::gRectsize == 0)
@@ -531,18 +630,18 @@ void T100_Disp::CalcScreenCoords(void)
 #ifdef ZIPIT_Z2
 	{
 		::gXoffset = 0;
-		::gYoffset = (MainWin->h() - MENU_HEIGHT - 20 - (int) (float) DispHeight * 1.3333) / 3 + MENU_HEIGHT+1;
+		::gYoffset = (MainWin->h() - menu_height - 20 - (int) (float) DispHeight * 1.3333) / 3 + menu_height + 1;
 	}
 #else
 	if (Fullscreen)
 	{
 		::gXoffset = MainWin->w() / 2 - 120 * MultFact;
-		::gYoffset = (MainWin->h() - MENU_HEIGHT - 20 - DispHeight * MultFact) / 3 + MENU_HEIGHT+1;
+		::gYoffset = (MainWin->h() - menu_height - 20 - DispHeight * MultFact) / 3 + menu_height + 1;
 	}
 	else
 	{
 		::gXoffset = 45*DisplayMode+1;
-		::gYoffset = 25*DisplayMode + MENU_HEIGHT+1;
+		::gYoffset = 25*DisplayMode + menu_height + 1;
 	}
 #endif
 
@@ -562,16 +661,16 @@ void T100_Disp::CalcScreenCoords(void)
 
 		// Calculate the top height of the Bezel
 		m_HasTopChassis = TRUE;
-		if (gYoffset-1 - MENU_HEIGHT-1 >= wantedH + 5)
+		if (gYoffset-1 - menu_height - 1 >= wantedH + 5)
 			m_BezelTopH = wantedH;
 		else
 		{
 			// Test if there's room for both Bezel and chassis detail
 			if (gYoffset > 6)
-				m_BezelTopH = gYoffset - MENU_HEIGHT - 1 - 6;
+				m_BezelTopH = gYoffset - menu_height - 1 - 6;
 			else
 			{
-				m_BezelTopH = gYoffset - MENU_HEIGHT - 1 - 1;
+				m_BezelTopH = gYoffset - menu_height - 1 - 1;
 				m_HasTopChassis = FALSE;
 			}
 		}
@@ -645,6 +744,22 @@ void show_message (const char *st)
 	
 }
 
+static int gResizeWindowPending = 0;
+
+static void deferred_resize_window_cb(void*)
+{
+	gResizeWindowPending = 0;
+	resize_window();
+}
+
+static void schedule_resize_window(void)
+{
+	if (gResizeWindowPending)
+		return;
+	gResizeWindowPending = 1;
+	Fl::add_timeout(0.0, deferred_resize_window_cb);
+}
+
 /*
 =======================================================
 Menu Item Callbacks
@@ -657,7 +772,7 @@ void cb_1x(Fl_Widget* w, void*)
 	Fullscreen = 0;
 
 	virtualt_prefs.set("MultFact",1);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_2x(Fl_Widget* w, void*)
 {
@@ -666,7 +781,7 @@ void cb_2x(Fl_Widget* w, void*)
 	Fullscreen = 0;
 
 	virtualt_prefs.set("MultFact",2);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_3x(Fl_Widget* w, void*)
 {
@@ -675,7 +790,7 @@ void cb_3x(Fl_Widget* w, void*)
 	Fullscreen = 0;
 
 	virtualt_prefs.set("MultFact",3);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_4x(Fl_Widget* w, void*)
 {
@@ -684,7 +799,7 @@ void cb_4x(Fl_Widget* w, void*)
 	Fullscreen = 0;
 
 	virtualt_prefs.set("MultFact",4);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_fullscreen(Fl_Widget* w, void*)
 {
@@ -693,7 +808,7 @@ void cb_fullscreen(Fl_Widget* w, void*)
 	Fullscreen = 1;
 
 	virtualt_prefs.set("MultFact",5);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_framed(Fl_Widget* w, void*)
 {
@@ -701,7 +816,7 @@ void cb_framed(Fl_Widget* w, void*)
 	DisplayMode ^= 1;
 
 	virtualt_prefs.set("DisplayMode",gpDisp->DisplayMode);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_solidchars (Fl_Widget* w, void*)
 {
@@ -709,7 +824,7 @@ void cb_solidchars (Fl_Widget* w, void*)
 	SolidChars ^= 1;
 	
 	virtualt_prefs.set("SolidChars",gpDisp->SolidChars);
-	resize_window();
+	schedule_resize_window();
 }
 void cb_save_basic(Fl_Widget* w, void*)
 {
@@ -1392,6 +1507,20 @@ Fl_Menu_Item menuitems[] = {
   { 0 }
 };
 
+static void sync_main_menu(void)
+{
+	if (Menu != NULL)
+	{
+#ifdef __APPLE__
+		if ((MainWin == NULL) || !MainWin->shown())
+			return;
+#endif
+		Menu->copy(menuitems);
+		Menu->menu_end();
+		Menu->update();
+	}
+}
+
 /*
 ============================================================================
 remote_set_speed:	This function sets the speed of the emulation
@@ -1453,6 +1582,8 @@ void remote_set_speed(int speed)
 		else
 			menuitems[mIndex+i].flags= FL_MENU_RADIO;
 	}
+
+	sync_main_menu();
 }
 
 void init_menus(void)
@@ -1470,6 +1601,8 @@ void init_menus(void)
 	while (menuitems[mIndex].callback_ != cb_RememCfg)
 		mIndex++;
 	menuitems[mIndex].flags= remem_menu_flag;
+
+	sync_main_menu();
 }
 
 /*
@@ -1492,6 +1625,105 @@ void enable_tpdd_log_menu(int bEnabled)
 	while (menuitems[mIndex].callback_ != cb_TpddServerLog)
 		mIndex++;
 	menuitems[mIndex].flags= tpdd_menu_flag;
+
+	sync_main_menu();
+}
+
+static void refresh_main_menu_state(void)
+{
+	int mIndex;
+	int i;
+
+	init_menus();
+
+	// Update Speed menu item if not default value.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != rspeed)
+		mIndex++;
+	for (i = 0; i < 4; i++)
+	{
+		if (i == fullspeed)
+			menuitems[mIndex+i].flags = FL_MENU_RADIO | FL_MENU_VALUE;
+		else
+			menuitems[mIndex+i].flags = FL_MENU_RADIO;
+	}
+
+	// Update Display Size from preference.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_1x)
+		mIndex++;
+	mIndex--;
+
+	int mf = MultFact;
+	if (Fullscreen)
+		mf = 5;
+	for (i = 1; i < 6; i++)
+	{
+		if (i == mf)
+		{
+			if (i == 5)
+				menuitems[i+mIndex].flags = FL_MENU_RADIO | FL_MENU_VALUE | FL_MENU_DIVIDER;
+			else
+				menuitems[i+mIndex].flags = FL_MENU_RADIO | FL_MENU_VALUE;
+		}
+		else
+		{
+			if (i == 5)
+				menuitems[i+mIndex].flags = FL_MENU_RADIO | FL_MENU_DIVIDER;
+			else
+				menuitems[i+mIndex].flags = FL_MENU_RADIO;
+		}
+	}
+
+	// Update Model selection.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_M100)
+		mIndex++;
+	for (i = MODEL_M100; i <= MODEL_PC8300; i++)
+	{
+		if (i == gModel)
+			menuitems[i+mIndex].flags = FL_MENU_RADIO | FL_MENU_VALUE;
+		else
+			menuitems[i+mIndex].flags = FL_MENU_RADIO;
+	}
+
+	// Update DisplayMode parameter.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_framed)
+		mIndex++;
+	if (DisplayMode == 0)
+		menuitems[mIndex].flags = FL_MENU_TOGGLE;
+	else
+		menuitems[mIndex].flags = FL_MENU_TOGGLE | FL_MENU_VALUE;
+
+	// Update SolidChars menu item.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_solidchars)
+		mIndex++;
+	if (SolidChars == 1)
+		menuitems[mIndex].flags = FL_MENU_TOGGLE | FL_MENU_VALUE | FL_MENU_DIVIDER;
+	else
+		menuitems[mIndex].flags = FL_MENU_TOGGLE | FL_MENU_DIVIDER;
+
+	// Update BasicSaveMode parameter.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_save_basic)
+		mIndex++;
+	if (BasicSaveMode == 1)
+		menuitems[mIndex].flags = FL_MENU_TOGGLE | FL_MENU_VALUE;
+	else
+		menuitems[mIndex].flags = FL_MENU_TOGGLE;
+
+	// Update COSaveMode parameter.
+	mIndex = 0;
+	while (menuitems[mIndex].callback_ != cb_save_co)
+		mIndex++;
+	if (COSaveMode == 1)
+		menuitems[mIndex].flags = FL_MENU_TOGGLE | FL_MENU_VALUE;
+	else
+		menuitems[mIndex].flags = FL_MENU_TOGGLE;
+
+	sync_main_menu();
 }
 
 /*
@@ -1504,6 +1736,12 @@ switch_model:	This function is called by the menu callback routines that
 */
 void switch_model(int model)
 {
+	if (MainWin != NULL)
+	{
+		gMainWinRestoreX = MainWin->x();
+		gMainWinRestoreY = MainWin->y();
+	}
+
 	/* Save RAM for current emulation */
 	save_ram();
 	free_mem();
@@ -1560,6 +1798,41 @@ void switch_model(int model)
 		gpDisp->Clear();
 	if (gpDebugMonitor != 0)
 		gpDebugMonitor->Clear();
+
+#ifdef __APPLE__
+	if (MainWin != NULL)
+	{
+		delete gpDisp;
+		gpDisp = NULL;
+
+		MainWin->begin();
+		if (gModel == MODEL_T200)
+			gpDisp = new T200_Disp(0, main_menu_height(), MainWin->w(), MainWin->h() - main_menu_height() - 20);
+		else
+			gpDisp = new T100_Disp(0, main_menu_height(), MainWin->w(), MainWin->h() - main_menu_height() - 20);
+		MainWin->end();
+
+		gpDisp->DispHeight = DispHeight;
+		gpDisp->DisplayMode = DisplayMode;
+		gpDisp->MultFact = MultFact;
+		gpDisp->SolidChars = SolidChars;
+
+		refresh_main_menu_state();
+		show_remem_mode();
+		resize_window();
+		MainWin->redraw();
+
+		/* Re-initialize the CPU */
+		init_cpu();
+
+		/* Update Memory Editor window if any */
+		cb_MemoryEditorUpdate();
+
+		// Update the File View window if it is open
+		fileview_model_changed();
+		return;
+	}
+#endif
 
 	delete MainWin;
 	init_display();
@@ -1781,6 +2054,8 @@ draw_static:	This routine draws the static portions of the LCD,
 */
 void T100_Disp::draw_static()
 {
+	const int menu_height = main_menu_height();
+
 	int c;
 	int width;
 	int x_pos, inc, start, y_pos;
@@ -1799,7 +2074,7 @@ void T100_Disp::draw_static()
 
 		// Draw border along the top
 		if (m_HasTopChassis)
-			fl_rectf(x(),y(),w(),m_BezelTop - MENU_HEIGHT - 1);
+			fl_rectf(x(),y(),w(),m_BezelTop - menu_height - 1);
 
 		// Draw border along the bottom
 		if (m_HasBottomChassis)
@@ -2121,6 +2396,8 @@ void init_display(void)
 	int			mIndex;
 	int			i;
 	char		temp[20];
+	const int menu_height = main_menu_height();
+	const int menu_bar_height = main_menu_bar_height();
 #ifdef WIN32
 	int			hiddenTaskBarAdjust = 0;
 #endif
@@ -2133,38 +2410,59 @@ void init_display(void)
 		DispHeight = 64;
 #ifdef ZIPIT_Z2
 	MainWin = new Fl_Window(240*MultFact + 90*DisplayMode+2,DispHeight*MultFact +
-		50*DisplayMode + MENU_HEIGHT + 22, "Virtual T");
+		50*DisplayMode + menu_height + 22, "Virtual T");
 	MainWin->fullscreen();
+	gMainWinFullscreenActive = TRUE;
 #else	/* ZIPIT_Z2 */
 	MainWin = new Fl_Window(320, 240, "Virtual T");
+	gMainWinFullscreenActive = FALSE;
+	if ((gMainWinRestoreX >= 0) && (gMainWinRestoreY >= 0))
+		MainWin->resize(gMainWinRestoreX, gMainWinRestoreY, MainWin->w(), MainWin->h());
 
 	// Check if we are running in full screen mode
 	if (MultFact == 5)
 	{
+		int oldw = MainWin->w();
+		int oldh = MainWin->h();
 		MainWin->fullscreen();
+		gMainWinFullscreenActive = TRUE;
 #ifdef WIN32
 		int sx, sy, sw, sh;
 		Fl::screen_xywh(sx, sy, sw, sh);
 		if ((sh == 480) || (sh == 800) || (sh == 600) || (sh == 768) || (sh == 1024) || (sh == 1280))
 			hiddenTaskBarAdjust = 4;
 		MainWin->resize(sx, sy, sw, sh-hiddenTaskBarAdjust);
+#elif defined(__APPLE__)
+		// Some FLTK/macOS combinations ignore fullscreen(); force screen size as fallback.
+		if ((MainWin->w() == oldw) && (MainWin->h() == oldh))
+		{
+			int sx, sy, sw, sh;
+			Fl::screen_xywh(sx, sy, sw, sh);
+			MainWin->resize(sx, sy, sw, sh);
+		}
 #endif	/* WIN32 */
 		MultFact = min(MainWin->w()/240, MainWin->h()/128);
 	}
 	else
 	{
+	#ifndef __APPLE__
 		if (MainWin->y() <= 0)
-			MainWin->fullscreen_off(32, 32, 
+			MainWin->resize(32, 32,
 			240*MultFact + 90*DisplayMode+2,DispHeight*MultFact +
-			50*DisplayMode + MENU_HEIGHT + 22);
+			50*DisplayMode + menu_height + 22);
+	#endif
 	}
 #endif	/* ZIPIT_Z2 */
 
-	Menu = new Fl_Menu_Bar(0, 0, MainWin->w(), MENU_HEIGHT-2);
+	#ifdef __APPLE__
+	Menu = new Fl_Sys_Menu_Bar(0, 0, MainWin->w(), menu_bar_height);
+	#else
+	Menu = new VT_Menu_Bar(0, 0, MainWin->w(), menu_bar_height);
+	#endif
 	if (gModel == MODEL_T200)
-		gpDisp = new T200_Disp(0, MENU_HEIGHT, MainWin->w(), MainWin->h() - MENU_HEIGHT - 20);
+		gpDisp = new T200_Disp(0, menu_height, MainWin->w(), MainWin->h() - menu_height - 20);
 	else
-		gpDisp = new T100_Disp(0, MENU_HEIGHT, MainWin->w(), MainWin->h() - MENU_HEIGHT - 20);
+		gpDisp = new T100_Disp(0, menu_height, MainWin->w(), MainWin->h() - menu_height - 20);
 
 	int subMenuDepth = 0;
 	for (i = 0; ; i++)
@@ -2192,119 +2490,8 @@ void init_display(void)
 	}
 
 	MainWin->callback(close_disp_cb);
-	Menu->menu(menuitems);
-        
-	init_menus();
 
-// Treat Values read in pref files
-// J. VERNET 
-	//==================================================
-	// Update Speed menu item if not default value
-	//==================================================
-	mIndex = 0;
-	while (menuitems[mIndex].callback_ != rspeed)
-		mIndex++;
-	for (i = 0; i < 4; i++)
-	{
-		if (i == fullspeed)
-			menuitems[mIndex+i].flags= FL_MENU_RADIO |FL_MENU_VALUE;
-		else
-			menuitems[mIndex+i].flags= FL_MENU_RADIO;
-	}
-
-	//==================================================
-	// Update Display Size from preference
-	//==================================================
-	mIndex = 0;
-	// Find first display size menu item
-	while (menuitems[mIndex].callback_ != cb_1x)
-		mIndex++;
-	mIndex--;
-
-	int mf = MultFact;
-	if (Fullscreen)
-		mf = 5;
-    for(i=1;i<6;i++)
-    {
-        if(i==mf) 
-		{
-            if(i==5) 
-                menuitems[i+mIndex].flags=FL_MENU_RADIO | FL_MENU_VALUE | FL_MENU_DIVIDER;
-            else menuitems[i+mIndex].flags=FL_MENU_RADIO | FL_MENU_VALUE;  
-		}
-		else
-		{
-            if(i==5) 
-                menuitems[i+mIndex].flags=FL_MENU_RADIO | FL_MENU_DIVIDER;
-            else menuitems[i+mIndex].flags=FL_MENU_RADIO;  
-		}
-    }
-
-	//==================================================
-	// Update Model selection
-	//==================================================
-	mIndex = 0;
-	// Find first model menu item
-	while (menuitems[mIndex].callback_ != cb_M100)
-		mIndex++;
-
-    for(i=MODEL_M100;i<=MODEL_PC8300;i++)
-    {
-        if(i==gModel) 
-			menuitems[i+mIndex].flags=FL_MENU_RADIO | FL_MENU_VALUE;  
-        else
-			menuitems[i+mIndex].flags=FL_MENU_RADIO;  
-    }
-
-	//==================================================
-	// Update DisplayMode parameter 
-	//==================================================
-    if(DisplayMode==0)
-	{
-		mIndex = 0;
-		while (menuitems[mIndex].callback_ != cb_framed)
-			mIndex++;
-        menuitems[mIndex].flags=FL_MENU_TOGGLE;
-	}
-
-	/*
-	==================================================
-	Update SolidChars menu item
-	==================================================
-	*/
-    if(SolidChars==1)
-	{
-		mIndex = 0;
-		while (menuitems[mIndex].callback_ != cb_solidchars)
-			mIndex++;
-        menuitems[mIndex].flags=FL_MENU_TOGGLE|FL_MENU_VALUE|FL_MENU_DIVIDER;
-	}
-        
-	/*
-	==================================================
-	Update BasicSaveMode parameter 
-	==================================================
-	*/
-    if(BasicSaveMode==1)
-	{
-		mIndex = 0;
-		while (menuitems[mIndex].callback_ != cb_save_basic)
-			mIndex++;
-        menuitems[mIndex].flags=FL_MENU_TOGGLE|FL_MENU_VALUE;
-	}
-    
-	/*
-	==================================================
-	 Update COSaveMode parameter 
-	==================================================
-	*/
-    if(COSaveMode==1)
-	{
-		mIndex = 0;
-		while (menuitems[mIndex].callback_ != cb_save_co)
-			mIndex++;
-        menuitems[mIndex].flags=FL_MENU_TOGGLE|FL_MENU_VALUE;
-	}
+	refresh_main_menu_state();
 
 	/* 
 	========================================
@@ -2380,6 +2567,8 @@ void init_display(void)
     
 	if (!gNoGUI)
 		MainWin->show();
+
+	sync_main_menu();
 
 #ifdef WIN32
 	// On Win32 platforms, the show() routine causes the window to shrink. Reset it if fullscreen.

@@ -74,6 +74,7 @@ static char		gMapData[REMEM_MAP_SIZE];	// 512 bytes of Map Data being edited
 
 // Menu items 
 Fl_Menu_Item gRememCfg_menuitems[] = {
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -83,6 +84,7 @@ Fl_Menu_Item gRememCfg_menuitems[] = {
 //	{ "Simulation Log Viewer", 0, 0 },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
   { 0 }
 };
 

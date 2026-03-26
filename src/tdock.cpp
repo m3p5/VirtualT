@@ -78,9 +78,11 @@ static Fl_Menu_Item menuitems[] = {
   { "&Emulation",         0, 0,  0, FL_SUBMENU },
      { "&Some Option",    0, 0,  0 },
      { 0 },
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
      { "&Assembler", 0, 0, 0, 0 },
      { 0 },
+#endif
   { "&Help", 0, 0, 0, FL_SUBMENU}, // | FL_MENU_DIVIDER},
      { "&About", 0, 0, 0, 0 },
      { 0 },

@@ -624,7 +624,7 @@ Flu_Tree_Browser :: Flu_Tree_Browser( int x, int y, int w, int h, const char *l 
   resizable( _box );
 
   // set up the recursive data structure
-  memset( &rdata, 0, sizeof(rdata) );
+  rdata = RData();
   rdata.root = &root;
   root.tree = this;
   rdata.tree = this;

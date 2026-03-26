@@ -58,6 +58,15 @@ extern uchar    gQuad;
 }
 
 void cb_Ide(Fl_Widget* w, void*); 
+
+#ifdef __APPLE__
+static int gOpenMemEditPending = 0;
+static void cb_open_memedit_deferred(void*)
+{
+	gOpenMemEditPending = 0;
+	cb_MemoryEditor(NULL, NULL);
+}
+#endif
 void cb_menu_run(Fl_Widget* w, void*);
 void cb_menu_stop(Fl_Widget* w, void*);
 void cb_menu_step(Fl_Widget* w, void*);
@@ -159,6 +168,7 @@ Fl_Menu_Item gMemEdit_menuitems[] = {
 	{ "Setup...",      0, cb_setup_memedit, 0},
 	{ 0 },
 
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -166,6 +176,7 @@ Fl_Menu_Item gMemEdit_menuitems[] = {
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
 
   { 0 }
 };
@@ -195,14 +206,21 @@ Callback routine for the memory editor window
 */
 void cb_memeditwin (Fl_Widget* w, void*)
 {
+	if (gmew == NULL)
+		return;
+
+	Fl_Window* pWin = gmew;
 	mem_clear_monitor_callback(memory_monitor_cb);
 	MemoryEditor_SavePrefs();
 
 	// Colapse the window
-	collapse_window(gmew);
+	collapse_window(pWin);
+	pWin->hide();
 
-	delete gmew;
 	gmew = NULL;
+
+	// Use FLTK's deferred deletion queue to avoid teardown during event dispatch.
+	Fl::delete_widget(pWin);
 }
 
 /*
@@ -930,11 +948,23 @@ void cb_MemoryEditor (Fl_Widget* pW, void*)
 	int			w = 585;
 	const int	wh = 50;
 
+#ifdef __APPLE__
+	if ((pW != NULL) && !gOpenMemEditPending)
+	{
+		gOpenMemEditPending = 1;
+		Fl::add_timeout(0.0, cb_open_memedit_deferred);
+		return;
+	}
+#endif
+
 	if (gmew != NULL)
 		return;
 
 	// Create the Memory Editor Window
 	gmew = new Fl_Double_Window(w, h+wh, "Memory Editor");
+	#ifdef __APPLE__
+	gmew->set_non_modal();
+	#endif
 
 	// Create a menu for the new window.
 	memedit_ctrl.pMenu = new Fl_Menu_Bar(0, 0, w, MENU_HEIGHT-2);
@@ -1236,8 +1266,11 @@ T100_MemEditor::T100_MemEditor(int x, int y, int w, int h) :
 
 T100_MemEditor::~T100_MemEditor()
 {
-	// Delete the popup menu
-	delete m_pPopupMenu;
+	// FLTK may already own and destroy this child when the parent group clears.
+	// Only delete manually when it is not parent-owned.
+	if (m_pPopupMenu != NULL && m_pPopupMenu->parent() == NULL)
+		delete m_pPopupMenu;
+	m_pPopupMenu = NULL;
 
 	// Delete all markers and undo markers
 	ResetMarkers();

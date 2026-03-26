@@ -89,11 +89,21 @@ fileview_ctrl_t	gFvCtrl;
 void cb_Ide(Fl_Widget* w, void*) ;
 void cb_view_refreseh(Fl_Widget*w, void*);
 
+#ifdef __APPLE__
+static int gOpenFileViewPending = 0;
+static void cb_open_fileview_deferred(void*)
+{
+	gOpenFileViewPending = 0;
+	cb_FileView(NULL, NULL);
+}
+#endif
+
 // Menu items for the disassembler
 Fl_Menu_Item gFileView_menuitems[] = {
  { "&View",         0, 0,        0, FL_SUBMENU },
 	{ "Refresh",	0, cb_view_refreseh, 0, 0 },
 	{ 0 },
+#ifndef __APPLE__
  { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -101,6 +111,7 @@ Fl_Menu_Item gFileView_menuitems[] = {
 	{ "Memory Editor",         0, cb_MemoryEditor },
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ 0 },
+#endif
   { 0 }
 };
 void fileview_mem_monitor(void);
@@ -112,13 +123,17 @@ Callback routine for the File Viewer window
 */
 void cb_fvwin (Fl_Widget* w, void*)
 {
+	if (gfvw == NULL)
+		return;
+
+	Fl_Window* pWin = gfvw;
 	mem_clear_monitor_callback(fileview_mem_monitor);
 
 	// Hide the window
-	gfvw->hide();
+	pWin->hide();
 
-	// Delete the window and set to NULL
-	delete gfvw;
+	// Use FLTK's deferred deletion queue to avoid teardown during event dispatch.
+	Fl::delete_widget(pWin);
 	gfvw = NULL;
 }
 
@@ -760,6 +775,15 @@ void cb_FileView(Fl_Widget* w, void*)
 	Fl_Box*			o;
 	int				width;
 
+#ifdef __APPLE__
+	if ((w != NULL) && !gOpenFileViewPending)
+	{
+		gOpenFileViewPending = 1;
+		Fl::add_timeout(0.0, cb_open_fileview_deferred);
+		return;
+	}
+#endif
+
 	if (gfvw != NULL)
 		return;
 
@@ -771,6 +795,9 @@ void cb_FileView(Fl_Widget* w, void*)
 
 	// Create File Viewer window
 	gfvw = new Fl_Double_Window(width, 480, "Model T File Viewer");
+	#ifdef __APPLE__
+	gfvw->set_non_modal();
+	#endif
 	gfvw->callback(cb_fvwin);
 
 	// Create a menu for the new window.

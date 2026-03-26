@@ -1,6 +1,57 @@
 # ChangeLog
 
 
+Version 2.1 (2026-03-25)
+
+- Fixed Emulation -> Display -> Fullscreen so it reliably enters fullscreen
+    mode on macOS instead of reverting to a windowed resize path.
+
+- Added a macOS fullscreen fallback path for FLTK builds where fullscreen()
+    does not immediately resize to the active screen bounds.
+
+- Fixed macOS menu instability and crashes when using menu items after moving
+    the main window across desktop Spaces.
+
+- Switched the macOS main menu integration to Fl_Sys_Menu_Bar and adjusted
+    window layout calculations accordingly.
+
+- Fixed startup crash caused by early system-menu synchronization by deferring
+    menu sync until the main window is shown.
+
+- Fixed Space-jumping behavior where display-size changes could move the app
+    back to Desktop 1.
+
+- Fixed Space-jumping behavior during model switching by reusing the existing
+    top-level main window on macOS and recreating only the display widget.
+
+- Fixed a Memory Editor close crash caused by double-deleting a popup menu
+    widget that was already owned and destroyed by FLTK parent teardown.
+
+- Hardened tool-window close handling on macOS by using FLTK deferred widget
+    deletion in close callbacks instead of immediate destruction during event
+    dispatch.
+
+- Deferred macOS tool-window creation from menu callbacks to the next event
+    loop tick to avoid FLTK menu reentrancy and system-menu registration races.
+
+- Marked tool windows as non-modal on macOS so FLTK does not register them in
+    the native Window-menu path that was triggering Cocoa-side crashes.
+
+- Fixed Disassembler teardown crash by removing manual deletion of FLTK-owned
+    editor child widgets and initializing related pointers defensively.
+
+- Removed duplicated embedded Tools submenus from secondary FLTK tool windows
+    on macOS and use the native main Tools menu for cross-window navigation.
+
+- Fixed C++ warning in Flu_Tree_Browser by replacing memset on non-trivial
+    RData with proper value initialization.
+
+- Fixed macOS linker warning:
+    "reducing alignment of section __DATA,__common from 0x8000 to 0x4000"
+    by zero-initializing large globals in memory.c so they are emitted as
+    regular zero-fill data definitions.
+
+
 Version 2.0 (2026-03-22)
 
 - Used #if LCD_DELAY_SIMULATION to block comment out the too agressive LCD

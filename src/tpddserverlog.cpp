@@ -76,6 +76,7 @@ static Fl_Menu_Item gServerLog_menuitems[] = {
 //	{ "Setup...",      			0, cb_setup_log, 0},
 	{ 0 },
 
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Assembler / IDE",       0, cb_Ide },
@@ -83,6 +84,7 @@ static Fl_Menu_Item gServerLog_menuitems[] = {
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
 
   { 0 }
 };

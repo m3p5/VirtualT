@@ -131,6 +131,16 @@ void cb_project_settings(Fl_Widget* w, void*);
 void add_recent_file_to_menu(const char *filename);
 void add_recent_project_to_menu(const char *filename);
 void cb_toolbar_find(Fl_Widget* w, void*);
+void cb_Ide(Fl_Widget* widget, void*);
+
+#ifdef __APPLE__
+static int gOpenIdePending = 0;
+static void cb_open_ide_deferred(void*)
+{
+	gOpenIdePending = 0;
+	cb_Ide(NULL, NULL);
+}
+#endif
 
 IMPLEMENT_DYNCREATE(VT_IdeGroup, VTObject);
 IMPLEMENT_DYNCREATE(VT_IdeSource, VTObject);
@@ -188,6 +198,7 @@ Fl_Menu_Item gIde_menuitems[] = {
 //  { "&Debug", 0, 0, 0, FL_SUBMENU },
 //	{ "Laptop Display",			0,		cb_lcd_display, 0, 0 },
 //	{ 0 },
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "CPU Registers",         0, cb_CpuRegs },
 	{ "Disassembler",          0, disassembler_cb },
@@ -195,6 +206,7 @@ Fl_Menu_Item gIde_menuitems[] = {
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ "Model T File Viewer",   0, 0 },
 	{ 0 },
+#endif
   { "&Help", 0, 0, 0, FL_SUBMENU },
 	{ "Help", 0, cb_help },
 	{ "About VirtualT", 0, cb_about },
@@ -306,23 +318,25 @@ void close_ide_cb(Fl_Widget* w, void*)
 
 	if (gpIde != NULL)
 	{
+		VT_Ide* pIde = gpIde;
+
 		// Check if project is dirty
-		if (gpIde->ProjectDirty())
+		if (pIde->ProjectDirty())
 		{
 			// Ask if project should be saved
-			ans = fl_choice("Save changes to project %s?", "Cancel", "Yes", "No", (const char *) gpIde->ProjectName());
+			ans = fl_choice("Save changes to project %s?", "Cancel", "Yes", "No", (const char *) pIde->ProjectName());
 			if (ans == 0)
 				return;
 			if (ans == 1)
-				gpIde->SaveProject();
+				pIde->SaveProject();
 		}
 
 		Ide_SavePrefs();
 
 		// Okay, close the window
 		setMonitorWindow(0);
-		gpIde->hide();
-		delete gpIde;
+		pIde->hide();
+		Fl::delete_widget(pIde);
 		gpIde = 0;
 		gPopup = 0;
 		gpLcd = 0;
@@ -1139,6 +1153,15 @@ void cb_Ide(Fl_Widget* widget, void*)
 {
 	int		maxH, maxW;
 
+#ifdef __APPLE__
+	if ((widget != NULL) && !gOpenIdePending)
+	{
+		gOpenIdePending = 1;
+		Fl::add_timeout(0.0, cb_open_ide_deferred);
+		return;
+	}
+#endif
+
 	if (gpIde == NULL)
 	{
 		// Get X/Y coords for IDE
@@ -1177,6 +1200,9 @@ void cb_Ide(Fl_Widget* widget, void*)
 			gIdeX = 0;
 		// Create a new window for the IDE workspace
 		gpIde = new VT_Ide(gIdeX, gIdeY, gIdeW, gIdeH , "Integrated Development Environment");
+		#ifdef __APPLE__
+		gpIde->set_non_modal();
+		#endif
 		gpIde->show();
 
 		// Test if last project should be opened

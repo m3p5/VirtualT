@@ -92,6 +92,15 @@ void cb_goto_prev_marker(Fl_Widget* w, void*);
 void debug_cpuregs_cb (int);
 void cb_Ide(Fl_Widget* w, void*) ;
 
+#ifdef __APPLE__
+static int gOpenCpuRegsPending = 0;
+static void cb_open_cpuregs_deferred(void*)
+{
+	gOpenCpuRegsPending = 0;
+	cb_CpuRegs(NULL, NULL);
+}
+#endif
+
 // Menu items for the disassembler
 Fl_Menu_Item gCpuRegs_menuitems[] = {
   { "T&race", 0, 0, 0, FL_SUBMENU },
@@ -103,6 +112,7 @@ Fl_Menu_Item gCpuRegs_menuitems[] = {
 	{ "Step Over  ",			FL_F + 10, cb_menu_step_over, 0, FL_MENU_DIVIDER },
 	{ "Setup...",				0, cb_setup_trace },
 	{ 0 },
+#ifndef __APPLE__
   { "&Tools", 0, 0, 0, FL_SUBMENU },
 	{ "Assembler / IDE",       0, cb_Ide },
 	{ "Disassembler",          0, disassembler_cb },
@@ -110,6 +120,7 @@ Fl_Menu_Item gCpuRegs_menuitems[] = {
 	{ "Peripheral Devices",    0, cb_PeripheralDevices },
 	{ "Model T File Viewer",   0, cb_FileView },
 	{ 0 },
+#endif
   { 0 }
 };
 
@@ -120,6 +131,9 @@ Callback routine for the CPU Regs window
 */
 void cb_cpuregswin (Fl_Widget* w, void* pOpaque)
 {
+	if (gcpuw == NULL)
+		return;
+
 	// Save the user preferences
 	gcpuw->SavePrefs();
 
@@ -141,8 +155,8 @@ void cb_cpuregswin (Fl_Widget* w, void* pOpaque)
 	// Remove ourselves as a debug monitor
 	debug_clear_monitor_callback(debug_cpuregs_cb);
 
-	// Delete the window and set to NULL
-	delete gcpuw;
+	// Use FLTK's deferred deletion queue to avoid teardown during event dispatch.
+	Fl::delete_widget(gcpuw);
 	gcpuw = NULL;
 }
 
@@ -2449,11 +2463,24 @@ Routine to create the PeripheralSetup Window and tabs
 */
 void cb_CpuRegs (Fl_Widget* w, void*)
 {
+
+#ifdef __APPLE__
+	if ((w != NULL) && !gOpenCpuRegsPending)
+	{
+		gOpenCpuRegsPending = 1;
+		Fl::add_timeout(0.0, cb_open_cpuregs_deferred);
+		return;
+	}
+#endif
+
 	if (gcpuw != NULL)
 		return;
 
 	// Create a CPU Registers window
 	gcpuw = new VTCpuRegs(640, 480, "CPU Registers");
+	#ifdef __APPLE__
+	gcpuw->set_non_modal();
+	#endif
 	gcpuw->callback(cb_cpuregswin, gcpuw);
 	gcpuw->end();
 
