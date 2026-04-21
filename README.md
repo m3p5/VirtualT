@@ -16,15 +16,15 @@ Built with **C++ 17** and **FLTK 1.4+**.
 
 ## Background
 
-I ran into several build warnings and errors when I tried to build Version 1.7 of [McNeight/VirtualT](https://github.com/McNeight/VirtualT/tree/master) on macOS 26.3, so I cloned the respository and went to work fixing these issues. Version 1.8 builds with no errors for me, but I still have more regression testing to perform. See [ChangeLog](./ChangeLog) for a summary of my fixes.
+I ran into several build warnings and errors when I tried to build Version 1.7 of [McNeight/VirtualT](https://github.com/McNeight/VirtualT/tree/master) on macOS 26.3, so I cloned the respository and went to work fixing these issues. Version 1.8 builds with no errors for me, but I still have more regression testing to perform, especially on Linux and Windows. See [ChangeLog](./ChangeLog) for a summary of my fixes.
 
 ---
 
 ## Screenshots
 
-Model 100
+**Model 100**
 ![Model 100](./screenshots/M100.png)
-Tandy 200
+**Tandy 200**
 ![Tandy 200](./screenshots/T200.png)
 
 ---
